@@ -8,6 +8,7 @@ on:
   schedule: daily
   slash_command:
     name: test-quality
+    events: [issues]
 
 permissions: read-all
 
