@@ -1,0 +1,66 @@
+name: "Compile Agentic Workflows"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/*.md
+      - .github/workflows/*.lock.yml
+      - .github/workflows/compile-agentic-workflows.yml
+      - .gitattributes
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/*.md
+      - .github/workflows/compile-agentic-workflows.yml
+      - .gitattributes
+
+permissions:
+  contents: write
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: true
+
+      - name: Install gh-aw extension
+        uses: github/gh-aw/actions/setup-cli@v0.76.1
+        with:
+          version: v0.76.1
+
+      - name: Compile agentic workflows
+        run: gh aw compile --validate --purge
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Fail pull requests with stale lock files
+        if: github.event_name == 'pull_request'
+        run: |
+          if [ -n "$(git status --porcelain .github/workflows .gitattributes)" ]; then
+            echo "Agentic workflow lock files are stale. Run 'gh aw compile --validate --purge' and commit the generated changes."
+            git status --short .github/workflows .gitattributes
+            git diff -- .github/workflows .gitattributes
+            exit 1
+          fi
+
+      - name: Commit generated lock files
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -z "$(git status --porcelain .github/workflows .gitattributes .github/aw 2>/dev/null)" ]; then
+            echo "No generated workflow changes."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .gitattributes .github/workflows
+          if [ -f .github/aw/actions-lock.json ]; then
+            git add .github/aw/actions-lock.json
+          fi
+          git commit -m "Compile agentic workflows"
+          git push

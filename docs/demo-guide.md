@@ -54,7 +54,9 @@ dotnet test .\AgenticWorkflows.slnx
 
 ## Workflow compilation
 
-Run this after changing workflow frontmatter:
+The workflows only show up as runnable GitHub Actions after `.lock.yml` files exist. For the first setup, push the repo and run **Compile Agentic Workflows** from the GitHub Actions tab. That workflow compiles and commits the lock files on GitHub.
+
+For local compilation, run this after changing workflow frontmatter:
 
 ```powershell
 gh aw compile

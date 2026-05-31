@@ -53,6 +53,8 @@ The test project intentionally contains both meaningful tests and a couple of lo
 
 ## Agentic workflow demo flow
 
+If the workflows do not appear in the GitHub Actions tab yet, first push this repo and run **Compile Agentic Workflows** from the Actions tab. That workflow runs `gh aw compile --validate --purge` on GitHub and commits the generated `.lock.yml` files that GitHub Actions needs in order to show and run the agentic workflows.
+
 1. **Documentation updater**: change an endpoint, model, or command in the app without updating docs, then run `gh aw run docs-updater`.
 2. **Test quality checker**: inspect the existing tests or add a superficial test, then run `gh aw run test-quality-checker`.
 3. **Duplicate code detector**: review `NotificationComposer`, which intentionally contains similar formatting logic, then run `gh aw run duplicate-code-detector`.
@@ -64,5 +66,10 @@ gh aw compile
 ```
 
 The markdown workflow files are the source of truth. The generated `.lock.yml` files should be committed when `gh aw` is available.
+
+For the first repository setup, also configure the Copilot engine secret before running an agentic workflow:
+
+1. Create a fine-grained PAT with Copilot Requests read permission.
+2. Add it as the repository Actions secret `COPILOT_GITHUB_TOKEN`.
 
 See `docs\demo-guide.md` for a presenter-oriented walkthrough and `docs\agentic-workflows.md` for workflow design notes.

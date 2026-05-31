@@ -29,6 +29,16 @@ gh aw compile
 
 Commit both the source `.md` files and generated `.lock.yml` files when the Agentic Workflows CLI is available.
 
+If the workflows do not appear in the GitHub Actions tab, run **Compile Agentic Workflows** from the Actions tab first. It installs `gh-aw`, runs:
+
+```bash
+gh aw compile --validate --purge
+```
+
+and commits the generated lock files back to the branch. After that commit is present on the default branch, the individual agentic workflows appear as runnable GitHub Actions.
+
+The default engine is Copilot. Before running the compiled workflows, add the repository Actions secret `COPILOT_GITHUB_TOKEN` as described in the gh-aw authentication docs.
+
 ## Demo-specific code hooks
 
 - `WorkItemService` has validation and summary behavior that documentation and tests can reason about.
