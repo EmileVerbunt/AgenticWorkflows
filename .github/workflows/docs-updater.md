@@ -34,6 +34,7 @@ safe-outputs:
       - "**/*.lock"
     protected-files:
       policy: fallback-to-issue
+      # README.md is intentionally editable because repository-level docs are in scope.
       exclude:
         - "README.md"
   noop:
@@ -66,7 +67,7 @@ Do not modify source code, tests, workflow files, project files, or generated fi
 
 1. Inspect recent commits and changed files to understand what code behavior may have changed since the last documentation review.
 2. Read the relevant code, tests, and existing documentation before deciding whether updates are needed.
-3. Use cache memory in `/tmp/gh-aw/cache-memory/` to remember the last reviewed commit or timestamp when helpful. Use filesystem-safe timestamp formats such as `YYYY-MM-DD-HH-MM-SS` with no colons, `T`, or `Z`.
+3. Use cache memory in `/tmp/gh-aw/cache-memory/` to remember the last reviewed commit or timestamp when helpful. For artifact and cross-platform filename compatibility, use filesystem-safe timestamp formats such as `YYYY-MM-DD-HH-MM-SS` with no colons, `T`, or `Z`.
 4. Check for drift in documented routes, request and response shapes, validation behavior, commands, prerequisites, demo flows, and repository structure.
 5. If documentation is already accurate, use the `noop` safe output with a concise explanation of what you checked.
 6. If documentation is stale or incomplete, edit only the allowed documentation files and create one draft pull request using the configured `create-pull-request` safe output.
