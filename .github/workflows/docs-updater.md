@@ -4,14 +4,6 @@ description: |
   Creates a draft pull request or issue when undocumented behavior is found.
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "src/AgenticWorkflows.Api/**"
-      - "tests/AgenticWorkflows.Api.Tests/**"
-      - "AgenticWorkflows.slnx"
-      - "README.md"
-      - "docs/**"
   workflow_dispatch:
 
 permissions: read-all

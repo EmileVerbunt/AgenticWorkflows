@@ -50,9 +50,6 @@
 
 name: "Duplicate Code Detector"
 on:
-  schedule:
-  - cron: "54 16 * * *"
-    # Friendly format: daily (scattered)
   workflow_dispatch:
     inputs:
       aw_context:
@@ -1374,4 +1371,3 @@ jobs:
             /tmp/gh-aw/safe-output-items.jsonl
             /tmp/gh-aw/temporary-id-map.json
           if-no-files-found: ignore
-

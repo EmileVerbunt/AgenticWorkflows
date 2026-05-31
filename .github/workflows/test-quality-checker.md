@@ -5,9 +5,6 @@ description: |
 
 on:
   workflow_dispatch:
-  schedule: daily
-  slash_command:
-    name: test-quality
 
 permissions: read-all
 
@@ -48,10 +45,6 @@ You are Test Quality Checker for `${{ github.repository }}`.
 ## Mission
 
 Improve confidence in the test suite. Focus on tests that catch real bugs and document useful behavior, not tests that merely increase coverage.
-
-## Command mode
-
-If this workflow was triggered by `/test-quality <instructions>`, follow those instructions directly. Keep the same quality bar and safety rules.
 
 ## Standard workflow
 

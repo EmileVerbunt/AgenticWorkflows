@@ -4,13 +4,11 @@ description: Identifies duplicate code patterns across the .NET demo app and sug
 
 on:
   workflow_dispatch:
-  schedule: daily
 
 permissions: read-all
 
 safe-outputs:
   create-issue:
-    expires: 7d
     title-prefix: "[duplicate-code] "
     labels: [automation, code-quality]
     assignees: copilot

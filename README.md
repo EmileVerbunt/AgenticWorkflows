@@ -53,7 +53,7 @@ The test project intentionally contains both meaningful tests and a couple of lo
 
 ## Agentic workflow demo flow
 
-If the workflows do not appear in the GitHub Actions tab yet, first push this repo and run **Compile Agentic Workflows** from the Actions tab. That workflow runs `gh aw compile --validate --purge` on GitHub and commits the generated `.lock.yml` files that GitHub Actions needs in order to show and run the agentic workflows.
+If the workflows do not appear in the GitHub Actions tab yet, compile the lock files manually. You can run `gh aw compile --validate --purge` locally, or run **Compile Agentic Workflows** from the Actions tab and download the generated artifact. Commit the generated `.lock.yml` files yourself so the demos remain manually controlled.
 
 1. **Documentation updater**: change an endpoint, model, or command in the app without updating docs, then run `gh aw run docs-updater`.
 2. **Test quality checker**: inspect the existing tests or add a superficial test, then run `gh aw run test-quality-checker`.
@@ -65,7 +65,7 @@ Compile workflow lock files after editing workflow frontmatter:
 gh aw compile
 ```
 
-The markdown workflow files are the source of truth. The generated `.lock.yml` files should be committed when `gh aw` is available.
+The markdown workflow files are the source of truth. The generated `.lock.yml` files should be committed when `gh aw` is available. The demo workflows are intentionally `workflow_dispatch` only; they do not run on push, pull request, schedule, or slash command triggers.
 
 For the first repository setup, also configure the Copilot engine secret before running an agentic workflow:
 

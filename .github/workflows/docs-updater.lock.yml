@@ -51,9 +51,6 @@
 
 name: "Documentation Updater"
 on:
-  push:
-    branches:
-    - main
   workflow_dispatch:
     inputs:
       aw_context:
@@ -1484,4 +1481,3 @@ jobs:
             /tmp/gh-aw/safe-output-items.jsonl
             /tmp/gh-aw/temporary-id-map.json
           if-no-files-found: ignore
-

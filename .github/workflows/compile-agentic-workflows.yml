@@ -2,22 +2,9 @@ name: "Compile Agentic Workflows"
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - .github/workflows/*.md
-      - .github/workflows/*.lock.yml
-      - .github/workflows/compile-agentic-workflows.yml
-      - .gitattributes
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/*.md
-      - .github/workflows/compile-agentic-workflows.yml
-      - .gitattributes
 
 permissions:
-  contents: write
-  actions: write
+  contents: read
 
 jobs:
   compile:
@@ -39,29 +26,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Fail pull requests with stale lock files
-        if: github.event_name == 'pull_request'
+      - name: Report generated changes
         run: |
           if [ -n "$(git status --porcelain .github/workflows .gitattributes)" ]; then
-            echo "Agentic workflow lock files are stale. Run 'gh aw compile --validate --purge' and commit the generated changes."
+            echo "Agentic workflow lock files changed. Download the artifact from this run and commit the generated files manually."
             git status --short .github/workflows .gitattributes
-            git diff -- .github/workflows .gitattributes
-            exit 1
-          fi
-
-      - name: Commit generated lock files
-        if: github.event_name != 'pull_request'
-        run: |
-          if [ -z "$(git status --porcelain .github/workflows .gitattributes .github/aw 2>/dev/null)" ]; then
+          else
             echo "No generated workflow changes."
-            exit 0
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .gitattributes .github/workflows
-          if [ -f .github/aw/actions-lock.json ]; then
-            git add .github/aw/actions-lock.json
-          fi
-          git commit -m "Compile agentic workflows"
-          git push
+      - name: Upload compiled workflow files
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-agentic-workflows
+          path: |
+            .github/workflows/*.lock.yml
+            .github/aw/actions-lock.json
+          if-no-files-found: warn
