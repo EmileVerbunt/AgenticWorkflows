@@ -1,7 +1,7 @@
 ---
 description: |
   Compares the current .NET app behavior with repository documentation.
-  Creates a draft pull request or issue when undocumented behavior is found.
+  Creates issues with clear documentation fix guidance when undocumented behavior is found.
 
 on:
   workflow_dispatch:
@@ -11,16 +11,10 @@ permissions: read-all
 network: defaults
 
 safe-outputs:
-  create-pull-request:
-    draft: true
-    title-prefix: "[docs] "
-    labels: [automation, documentation]
-    max: 1
-    protected-files: fallback-to-issue
   create-issue:
     title-prefix: "[docs] "
     labels: [automation, documentation]
-    max: 1
+    max: 3
 
 tools:
   github:
@@ -50,19 +44,8 @@ Keep README and `docs/` synchronized with the ASP.NET Core Web API in `src/Agent
    - Setup, run, or test commands in solution/project files.
 4. Build a concise gap list of code behavior that is missing, stale, or contradicted in the docs.
 5. If the current documentation already covers the current code behavior well enough for the demo, produce no write output.
-6. If gaps are straightforward documentation updates, create one focused draft pull request using the configured safe output.
-7. If the gap is ambiguous, broad, or requires product-owner judgment, create one focused issue instead of a pull request.
-8. Keep pull-request changes limited to markdown documentation unless the documentation build itself requires a small metadata fix.
-
-## Pull request requirements
-
-When creating a documentation PR:
-
-- The title must describe the undocumented behavior, for example `Document work item summary response`.
-- The body must list the code behavior that was missing from documentation.
-- The body must list the documentation files changed.
-- The body must include validation performed or explain why validation was not run.
-- Do not include unrelated cleanup or style-only rewrites.
+6. If documentation gaps are found, create focused issues using the configured safe output.
+7. Do not create branches, commits, pull requests, or file changes.
 
 ## Issue requirements
 
@@ -70,8 +53,10 @@ When creating a documentation issue:
 
 - The title must describe the missing or stale documentation.
 - The body must list the relevant code files and behavior.
-- The body must explain why the workflow chose an issue instead of a pull request.
-- The issue must be actionable for a future documentation update.
+- The body must list the documentation files or sections that likely need updates.
+- The body must include clear, concrete steps for how a future contributor can fix the documentation.
+- The body must include suggested validation commands when commands or setup instructions are affected.
+- The issue must be actionable without requiring the reader to rerun the workflow.
 
 ## Documentation quality bar
 
@@ -89,4 +74,4 @@ dotnet build AgenticWorkflows.slnx
 dotnet test AgenticWorkflows.slnx
 ```
 
-If validation cannot run because tooling is unavailable, state that clearly in the draft PR.
+If validation cannot run because tooling is unavailable, state that clearly in the issue.

@@ -6,17 +6,17 @@ In this repo, workflow source files live in `.github\workflows`:
 
 | Workflow | Trigger | Main safe output | Purpose |
 | --- | --- | --- | --- |
-| `docs-updater.md` | Manual dispatch only | Draft pull request or issue | Compare current code behavior with docs and open a PR or issue for missing documentation updates. |
-| `test-quality-checker.md` | Manual dispatch only | Issue, comment, or draft pull request | Improve test value and maintainability. |
-| `duplicate-code-detector.md` | Manual dispatch only | Issue | Report meaningful duplicate code patterns. |
+| `docs-updater.md` | Manual dispatch only | Issue | Compare current code behavior with docs and open actionable issues for missing documentation updates. |
+| `test-quality-checker.md` | Manual dispatch only | Issue | Report missing or weak unhappy-flow test coverage with a concrete fix table. |
+| `duplicate-code-detector.md` | Manual dispatch only | Issue | Report meaningful duplicate code patterns with concrete refactoring guidance. |
 
 ## Safety posture
 
 The workflows are designed for demos and use conservative defaults:
 
 - Read-only repository permissions for the agentic portion.
-- `safe-outputs` for writes such as issues, comments, and draft pull requests.
-- Human review before merging AI-generated changes.
+- `safe-outputs` for issue creation.
+- Human review before acting on AI-generated recommendations.
 - Small maximum output counts to avoid noisy runs.
 - Manual `workflow_dispatch` triggers only, so demos run when a presenter starts them.
 
@@ -45,5 +45,5 @@ The default engine is Copilot. Before running the compiled workflows, add the re
 ## Demo-specific code hooks
 
 - `WorkItemService` has validation and summary behavior that documentation and tests can reason about.
-- `WeakCoverageTests` contains intentionally weak tests to demonstrate that test quality is more important than line coverage alone.
+- `WeakCoverageTests` contains intentionally weak tests to demonstrate that unhappy-flow coverage and meaningful assertions matter more than line coverage alone.
 - `NotificationComposer` contains a bounded duplicated pattern for the duplicate-code detector demo.

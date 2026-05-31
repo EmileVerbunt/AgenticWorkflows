@@ -6,8 +6,8 @@ The app is intentionally simple: an ASP.NET Core Web API manages demo work items
 
 | Demo | Workflow source | What it shows |
 | --- | --- | --- |
-| Documentation updater/checker | `.github\workflows\docs-updater.md` | Finds documentation drift after code changes and opens a draft docs PR. |
-| Test quality checker | `.github\workflows\test-quality-checker.md` | Reviews whether tests are valuable, not just whether they increase coverage. |
+| Documentation updater/checker | `.github\workflows\docs-updater.md` | Finds documentation drift after code changes and creates focused documentation issues. |
+| Test quality checker | `.github\workflows\test-quality-checker.md` | Reviews whether unhappy flows are covered by meaningful tests. |
 | Duplicate code detector | `.github\workflows\duplicate-code-detector.md` | Finds repeated source-code patterns and creates focused refactoring issues. |
 
 ## Prerequisites
@@ -65,7 +65,7 @@ Compile workflow lock files after editing workflow frontmatter:
 gh aw compile
 ```
 
-The markdown workflow files are the source of truth. The generated `.lock.yml` files should be committed when `gh aw` is available. The demo workflows are intentionally `workflow_dispatch` only; they do not run on push, pull request, schedule, or slash command triggers.
+The markdown workflow files are the source of truth. The generated `.lock.yml` files should be committed when `gh aw` is available. The demo workflows are intentionally `workflow_dispatch` only; they do not run from automatic triggers.
 
 For the first repository setup, also configure the Copilot engine secret before running an agentic workflow:
 

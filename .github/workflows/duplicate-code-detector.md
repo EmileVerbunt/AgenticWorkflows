@@ -25,7 +25,7 @@ timeout-minutes: 15
 
 # Duplicate Code Detector
 
-Analyze the repository for meaningful duplicate code patterns and create focused refactoring issues when findings are actionable.
+Analyze the repository for meaningful duplicate code patterns. Create focused issues with clear refactoring guidance when findings are actionable.
 
 ## Scope
 
@@ -39,11 +39,12 @@ Prioritize production code under `src/AgenticWorkflows.Api`. Skip:
 
 ## Detection workflow
 
-1. Review recent commits and changed source files when event context is available.
-2. Search for exact, structural, and functional duplication.
-3. Compare suspicious blocks semantically, not just textually.
-4. Treat `NotificationComposer` as a useful demo candidate because it intentionally contains repeated formatting logic.
-5. Only create issues for findings that are significant enough to justify refactoring.
+1. Search the current repository state for exact, structural, and functional duplication.
+2. Compare suspicious blocks semantically, not just textually.
+3. Treat `NotificationComposer` as a useful demo candidate because it intentionally contains repeated formatting logic.
+4. If the current code does not contain meaningful duplication above the reporting threshold, produce no write output.
+5. If actionable duplication is found, create focused issues using the configured safe output.
+6. Do not create branches, commits, pull requests, or file changes.
 
 ## Reporting threshold
 
@@ -54,14 +55,16 @@ Create an issue when a pattern has either:
 
 Create one issue per distinct duplication pattern. Limit each run to the top three findings.
 
-## Issue format
+## Issue requirements
 
-Each issue should include:
+When creating a duplicate-code issue:
 
 - Summary of the duplicated pattern.
 - Specific file paths and line ranges.
 - Why the duplication matters.
 - A practical refactoring recommendation.
+- Clear, concrete steps for how a future contributor can perform the refactor.
+- Any behavior-preservation risks to watch for.
 - Suggested validation commands, usually:
 
   ```bash

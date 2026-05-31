@@ -18,7 +18,7 @@ This repository keeps the code intentionally small so the workflow outputs are e
    gh aw run docs-updater
    ```
 
-Expected outcome: the workflow reads the code and docs, identifies drift, and proposes documentation updates through a draft pull request.
+Expected outcome: the workflow reads the code and docs, identifies drift, and creates an issue with clear documentation update steps.
 
 ## Demo 2: test quality checker
 
@@ -30,7 +30,7 @@ Expected outcome: the workflow reads the code and docs, identifies drift, and pr
    gh aw run test-quality-checker
    ```
 
-Expected outcome: the workflow distinguishes useful behavior tests from low-value tests and suggests higher-impact test improvements, such as additional validation, edge-case, or integration tests.
+Expected outcome: the workflow focuses on unhappy flows, then creates an issue with a markdown table that lists missing or weak coverage, why each gap matters, suggested tests, assertions, and validation commands.
 
 ## Demo 3: duplicate-code detector
 
@@ -42,7 +42,7 @@ Expected outcome: the workflow distinguishes useful behavior tests from low-valu
    gh aw run duplicate-code-detector
    ```
 
-Expected outcome: the workflow creates a focused issue describing the duplicated pattern, impact, and a possible refactoring path.
+Expected outcome: the workflow creates a focused issue describing the duplicated pattern, impact, concrete refactoring steps, and validation commands.
 
 ## Local validation commands
 
