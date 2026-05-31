@@ -1,11 +1,17 @@
 ---
 description: |
-  Checks whether the .NET demo app documentation is current after code changes.
-  Creates a draft pull request with focused documentation updates when drift is found.
+  Compares the current .NET app behavior with repository documentation.
+  Creates a draft pull request or issue when undocumented behavior is found.
 
 on:
   push:
     branches: [main]
+    paths:
+      - "src/AgenticWorkflows.Api/**"
+      - "tests/AgenticWorkflows.Api.Tests/**"
+      - "AgenticWorkflows.slnx"
+      - "README.md"
+      - "docs/**"
   workflow_dispatch:
 
 permissions: read-all
@@ -19,6 +25,10 @@ safe-outputs:
     labels: [automation, documentation]
     max: 1
     protected-files: fallback-to-issue
+  create-issue:
+    title-prefix: "[docs] "
+    labels: [automation, documentation]
+    max: 1
 
 tools:
   github:
@@ -35,15 +45,41 @@ You are Documentation Updater for `${{ github.repository }}`.
 
 ## Mission
 
-Keep README and `docs/` synchronized with the ASP.NET Core Web API in `src/AgenticWorkflows.Api`.
+Keep README and `docs/` synchronized with the ASP.NET Core Web API in `src/AgenticWorkflows.Api` by comparing the current code behavior with the current documentation.
 
 ## Instructions
 
-1. Read `README.md`, `docs/demo-guide.md`, `docs/agentic-workflows.md`, and the source files under `src/AgenticWorkflows.Api`.
-2. Compare documented commands, routes, request shapes, response shapes, and demo storylines with the current code.
-3. If documentation is already accurate, produce no write output.
-4. If documentation is stale or incomplete, create one focused draft pull request using the configured safe output.
-5. Keep changes limited to markdown documentation unless the documentation build itself requires a small metadata fix.
+1. Read repository documentation: `README.md`, `docs/demo-guide.md`, and `docs/agentic-workflows.md`.
+2. Read the current application source and infer the documented public behavior from code, not from commit history.
+3. Focus on documentation-affecting behavior in:
+   - Routes and HTTP methods in `src/AgenticWorkflows.Api/Program.cs`.
+   - Request/response models under `src/AgenticWorkflows.Api/Models`.
+   - Demo behavior and validation rules under `src/AgenticWorkflows.Api/Services`.
+   - Setup, run, or test commands in solution/project files.
+4. Build a concise gap list of code behavior that is missing, stale, or contradicted in the docs.
+5. If the current documentation already covers the current code behavior well enough for the demo, produce no write output.
+6. If gaps are straightforward documentation updates, create one focused draft pull request using the configured safe output.
+7. If the gap is ambiguous, broad, or requires product-owner judgment, create one focused issue instead of a pull request.
+8. Keep pull-request changes limited to markdown documentation unless the documentation build itself requires a small metadata fix.
+
+## Pull request requirements
+
+When creating a documentation PR:
+
+- The title must describe the undocumented behavior, for example `Document work item summary response`.
+- The body must list the code behavior that was missing from documentation.
+- The body must list the documentation files changed.
+- The body must include validation performed or explain why validation was not run.
+- Do not include unrelated cleanup or style-only rewrites.
+
+## Issue requirements
+
+When creating a documentation issue:
+
+- The title must describe the missing or stale documentation.
+- The body must list the relevant code files and behavior.
+- The body must explain why the workflow chose an issue instead of a pull request.
+- The issue must be actionable for a future documentation update.
 
 ## Documentation quality bar
 

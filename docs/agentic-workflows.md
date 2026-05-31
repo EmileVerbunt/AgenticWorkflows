@@ -6,7 +6,7 @@ In this repo, workflow source files live in `.github\workflows`:
 
 | Workflow | Trigger | Main safe output | Purpose |
 | --- | --- | --- | --- |
-| `docs-updater.md` | Push to `main`, manual dispatch | Draft pull request | Keep README and docs synchronized with the API. |
+| `docs-updater.md` | Push to `main`, manual dispatch | Draft pull request or issue | Compare current code behavior with docs and open a PR or issue for missing documentation updates. |
 | `test-quality-checker.md` | Manual dispatch, scheduled run, `/test-quality` command | Issue, comment, or draft pull request | Improve test value and maintainability. |
 | `duplicate-code-detector.md` | Manual dispatch, scheduled run | Issue | Report meaningful duplicate code patterns. |
 
