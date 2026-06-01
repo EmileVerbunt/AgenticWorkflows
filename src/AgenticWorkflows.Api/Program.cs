@@ -59,3 +59,5 @@ workItems.MapGet("/{id:guid}/notifications", (Guid id, WorkItemService service) 
     .WithName("GetWorkItemNotifications");
 
 app.Run();
+
+public partial class Program;
