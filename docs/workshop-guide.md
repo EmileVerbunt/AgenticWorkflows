@@ -57,6 +57,8 @@ git switch -c workshop/<workflow-id>
 
 Create `.github/workflows/<workflow-id>.md` from the contract in your assignment issue. You may use the repository's `agentic-workflows` Copilot agent for help.
 
+Follow [Create your first workflow](first-workflow-quickstart.md) for a copy-pasteable Copilot prompt and commands.
+
 Compile:
 
 ```bash

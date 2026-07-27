@@ -4,12 +4,14 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 cd "${ROOT_DIR}"
+bash .devcontainer/install-gh-aw.sh
 
 echo
 echo "Agentic Workflows workshop ready"
 echo "---------------------------------"
-echo "gh-aw: $(gh aw version | head -n 1)"
+echo "gh-aw: $(gh aw version 2>&1 | head -n 1)"
 echo ".NET:  $(dotnet --version)"
+echo "Copilot auth: managed organization token; no repository secret required"
 
 if gh auth status >/dev/null 2>&1; then
   echo "GitHub CLI: authenticated"

@@ -53,6 +53,8 @@ Open an issue labeled `assignment` and assign it to yourself:
 
 The advanced pull-request reviewer uses the open pull request labeled `sample-pr`.
 
+Open `docs/first-workflow-quickstart.md` for a copy-pasteable Copilot prompt and the shortest implementation path.
+
 ## Step 4: Build, compile, and submit
 
 Create a branch:

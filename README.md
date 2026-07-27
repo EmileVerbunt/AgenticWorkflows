@@ -25,6 +25,18 @@ Developers who are new to GitHub Actions and GitHub Agentic Workflows. Basic fam
 
 No local installation or repository secret is required. The Codespace installs the pinned gh-aw CLI and validates the solution. Copilot inference uses the managed organization's GitHub Actions token through `copilot-requests: write`.
 
+## Create your first workflow
+
+Use the [workshop quick start](docs/first-workflow-quickstart.md) for the shortest path:
+
+1. Verify `gh aw version`.
+2. Ask the repository's **agentic-workflows** Copilot agent to implement your assignment issue.
+3. Run `gh aw compile <workflow-id> --validate`.
+4. Open and merge your participant pull request.
+5. Run `gh aw run <workflow-id>` from `main`.
+
+The Codespace handles CLI installation. Participants do not create a `COPILOT_GITHUB_TOKEN`; workflows use `copilot-requests: write`.
+
 ## Existing demonstrations
 
 | Workflow | What it demonstrates |
@@ -65,6 +77,7 @@ dotnet run --project src/AgenticWorkflows.Api/AgenticWorkflows.Api.csproj --urls
 
 ## Guides
 
+- [Create your first workflow](docs/first-workflow-quickstart.md)
 - [Participant workshop guide](docs/workshop-guide.md)
 - [Facilitator demo guide](docs/demo-guide.md)
 - [Agentic workflow design notes](docs/agentic-workflows.md)

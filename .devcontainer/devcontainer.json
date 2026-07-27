@@ -16,8 +16,8 @@
       "onAutoForward": "notify"
     }
   },
-  "postCreateCommand": "sed -i 's/\\r$//' .devcontainer/postCreate.sh .devcontainer/postStart.sh && bash .devcontainer/postCreate.sh",
-  "postStartCommand": "sed -i 's/\\r$//' .devcontainer/postStart.sh && bash .devcontainer/postStart.sh",
+  "postCreateCommand": "sed -i 's/\\r$//' .devcontainer/*.sh && bash .devcontainer/postCreate.sh",
+  "postStartCommand": "sed -i 's/\\r$//' .devcontainer/*.sh && bash .devcontainer/postStart.sh",
   "customizations": {
     "vscode": {
       "extensions": [
