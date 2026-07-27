@@ -17,9 +17,9 @@ jobs:
           persist-credentials: true
 
       - name: Install gh-aw extension
-        uses: github/gh-aw/actions/setup-cli@v0.76.1
+        uses: github/gh-aw/actions/setup-cli@v0.83.1
         with:
-          version: v0.76.1
+          version: v0.83.1
 
       - name: Compile agentic workflows
         run: gh aw compile --validate --purge

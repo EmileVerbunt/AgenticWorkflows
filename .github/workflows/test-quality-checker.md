@@ -6,7 +6,11 @@ description: |
 on:
   workflow_dispatch:
 
-permissions: read-all
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  copilot-requests: write
 
 network:
   allowed:
@@ -21,8 +25,8 @@ safe-outputs:
 
 tools:
   github:
-    toolsets: [all]
-  bash: true
+    mode: gh-proxy
+    toolsets: [default]
   repo-memory: true
 
 timeout-minutes: 20
@@ -51,9 +55,10 @@ Improve confidence in the test suite by checking whether unhappy flows are cover
 6. Classify findings by value:
    - High value: validation failures, not-found paths, invalid input boundaries, invalid state transitions, regression risks.
    - Low value: enum-count checks, tests that only assert a value is not empty, tests that mirror implementation trivia.
-7. If the current tests already cover the important unhappy flows with meaningful assertions, produce no write output.
-8. If unhappy-flow coverage is missing or weak, create focused issues using the configured safe output.
-9. Do not create branches, commits, pull requests, or file changes.
+7. Search open issues with the `[test-quality]` title prefix for an equivalent report covering the same behavior and files.
+8. If the current tests already cover the important unhappy flows or an equivalent issue already exists, use `noop` with a short explanation and link the existing issue when applicable.
+9. If a new unhappy-flow gap is found, create a focused issue using the configured safe output.
+10. Do not create branches, commits, pull requests, or file changes.
 
 ## Issue requirements
 

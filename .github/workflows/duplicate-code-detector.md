@@ -5,20 +5,28 @@ description: Identifies duplicate code patterns across the .NET demo app and sug
 on:
   workflow_dispatch:
 
-permissions: read-all
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  copilot-requests: write
+
+network:
+  allowed:
+    - defaults
+    - dotnet
 
 safe-outputs:
   create-issue:
     title-prefix: "[duplicate-code] "
     labels: [automation, code-quality]
-    assignees: copilot
     group: true
     max: 3
 
 tools:
   github:
-    toolsets: [all]
-  bash: true
+    mode: gh-proxy
+    toolsets: [default]
 
 timeout-minutes: 15
 ---
@@ -42,9 +50,10 @@ Prioritize production code under `src/AgenticWorkflows.Api`. Skip:
 1. Search the current repository state for exact, structural, and functional duplication.
 2. Compare suspicious blocks semantically, not just textually.
 3. Treat `NotificationComposer` as a useful demo candidate because it intentionally contains repeated formatting logic.
-4. If the current code does not contain meaningful duplication above the reporting threshold, produce no write output.
-5. If actionable duplication is found, create focused issues using the configured safe output.
-6. Do not create branches, commits, pull requests, or file changes.
+4. Search open issues with the `[duplicate-code]` title prefix for an equivalent report covering the same pattern and files.
+5. If the current code does not contain meaningful duplication above the reporting threshold or an equivalent issue already exists, use `noop` with a short explanation and link the existing issue when applicable.
+6. If a new actionable duplication is found, create a focused issue using the configured safe output.
+7. Do not create branches, commits, pull requests, or file changes.
 
 ## Reporting threshold
 

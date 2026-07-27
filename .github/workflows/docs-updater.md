@@ -6,9 +6,16 @@ description: |
 on:
   workflow_dispatch:
 
-permissions: read-all
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  copilot-requests: write
 
-network: defaults
+network:
+  allowed:
+    - defaults
+    - dotnet
 
 safe-outputs:
   create-issue:
@@ -18,9 +25,9 @@ safe-outputs:
 
 tools:
   github:
-    toolsets: [all]
+    mode: gh-proxy
+    toolsets: [default]
   web-fetch:
-  bash: true
 
 timeout-minutes: 15
 ---
@@ -43,9 +50,10 @@ Keep README and `docs/` synchronized with the ASP.NET Core Web API in `src/Agent
    - Demo behavior and validation rules under `src/AgenticWorkflows.Api/Services`.
    - Setup, run, or test commands in solution/project files.
 4. Build a concise gap list of code behavior that is missing, stale, or contradicted in the docs.
-5. If the current documentation already covers the current code behavior well enough for the demo, produce no write output.
-6. If documentation gaps are found, create focused issues using the configured safe output.
-7. Do not create branches, commits, pull requests, or file changes.
+5. Search open issues with the `[docs]` title prefix for an equivalent report covering the same behavior and files.
+6. If the current documentation is sufficient or an equivalent issue already exists, use `noop` with a short explanation and link the existing issue when applicable.
+7. If a new documentation gap is found, create a focused issue using the configured safe output.
+8. Do not create branches, commits, pull requests, or file changes.
 
 ## Issue requirements
 

@@ -1,67 +1,56 @@
-# Demo guide
+# Facilitator demo guide
 
-This guide gives a short presenter flow for using this repository to demonstrate GitHub Agentic Workflows.
+Use this guide for the 7-minute demonstration before participants begin their assignments.
 
 ## Storyline
 
-Traditional automation is good at repeatable if/then checks. Agentic workflows are useful when the repository needs contextual judgment: deciding whether docs are stale, whether tests are meaningful, or whether similar code should be refactored.
+Traditional automation evaluates deterministic rules. Agentic workflows are useful when a repository needs contextual judgment and a guarded handoff to a human.
 
-This repository keeps the code intentionally small so the workflow outputs are easy to review during a live demo.
+Show the workflow Markdown first, then its issue output. Emphasize that the agent receives read-only permissions and writes through a safe output.
 
-## Demo 1: documentation updater/checker
+## Demo 1: Test quality checker
 
-1. Change the API surface, for example by adding a field to `WorkItemSummary` or renaming an endpoint.
-2. Do not update README or `docs\agentic-workflows.md`.
-3. Run:
+Open:
 
-   ```powershell
-   gh aw run docs-updater
-   ```
+- `.github/workflows/test-quality-checker.md`
+- `tests/AgenticWorkflows.Api.Tests/WeakCoverageTests.cs`
+- one generated `[test-quality]` issue
 
-Expected outcome: the workflow reads the code and docs, identifies drift, and creates an issue with clear documentation update steps.
+Explain that passing tests and line coverage are not the same as confidence. The workflow maps important failure behavior to meaningful assertions and no-ops if an equivalent issue already exists.
 
-## Demo 2: test quality checker
+Run when needed:
 
-1. Open `tests\AgenticWorkflows.Api.Tests\WeakCoverageTests.cs`.
-2. Point out that these tests pass but provide limited confidence.
-3. Run:
-
-   ```powershell
-   gh aw run test-quality-checker
-   ```
-
-Expected outcome: the workflow focuses on unhappy flows, then creates an issue with a markdown table that lists missing or weak coverage, why each gap matters, suggested tests, assertions, and validation commands.
-
-## Demo 3: duplicate-code detector
-
-1. Open `src\AgenticWorkflows.Api\Services\NotificationComposer.cs`.
-2. Point out the repeated formatting logic in the notification builders.
-3. Run:
-
-   ```powershell
-   gh aw run duplicate-code-detector
-   ```
-
-Expected outcome: the workflow creates a focused issue describing the duplicated pattern, impact, concrete refactoring steps, and validation commands.
-
-## Local validation commands
-
-```powershell
-dotnet restore .\AgenticWorkflows.slnx
-dotnet build .\AgenticWorkflows.slnx
-dotnet test .\AgenticWorkflows.slnx
+```bash
+gh aw run test-quality-checker
 ```
 
-## Workflow compilation
+## Demo 2: Duplicate code detector
 
-The workflows only show up as runnable GitHub Actions after `.lock.yml` files exist. For the first setup, run `gh aw compile --validate --purge` locally and commit the generated lock files.
+Open `src/AgenticWorkflows.Api/Services/NotificationComposer.cs` and point out the repeated description and due-date formatting.
 
-If local `gh-aw` is unavailable, run **Compile Agentic Workflows** from the GitHub Actions tab, download the `compiled-agentic-workflows` artifact, and commit the generated files manually. This repository keeps demo workflows manual-only, so the compiler workflow does not push changes itself.
+The workflow must decide whether the repetition crosses a reporting threshold rather than flagging every similar line.
 
-For local compilation, run this after changing workflow frontmatter:
-
-```powershell
-gh aw compile
+```bash
+gh aw run duplicate-code-detector
 ```
 
-The generated `.lock.yml` files are not hand-authored. Commit them together with the markdown workflow source files.
+## Demo 3: Documentation updater
+
+Show how `Program.cs`, models, and README form a public contract. The workflow compares current behavior with documentation and creates a bounded issue instead of directly changing the repository.
+
+```bash
+gh aw run docs-updater
+```
+
+## Handoff to participants
+
+Open the seeded sample pull request and the four assignment issues. Tell participants:
+
+1. Choose one assignment.
+2. Keep agent permissions read-only.
+3. Use the required safe output.
+4. Define when the workflow should no-op.
+5. Commit the source and generated lock file.
+6. Merge the participant pull request before manually running the new workflow.
+
+Avoid running all three demonstrations live; one live run plus existing issue examples fits the 45-minute schedule.

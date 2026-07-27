@@ -1,75 +1,71 @@
-# AgenticWorkflows
+# Agentic Workflows Workshop
 
-AgenticWorkflows is a small .NET demo repository for showing how GitHub Agentic Workflows can apply continuous AI to everyday engineering work.
+Build and run a GitHub Agentic Workflow in less than 45 minutes.
 
-The app is intentionally simple: an ASP.NET Core Web API manages demo work items, an xUnit test project verifies the service layer, and the repository includes three agentic workflow examples:
+This template repository contains a small .NET 10 API, three working agentic workflow demonstrations, and four unimplemented assignments. Participants create their own repository from the template and work entirely in GitHub Codespaces.
 
-| Demo | Workflow source | What it shows |
+## Who this is for
+
+Developers who are new to GitHub Actions and GitHub Agentic Workflows. Basic familiarity with repositories, branches, and pull requests is helpful.
+
+## What you will learn
+
+- Author an agentic workflow in Markdown.
+- Configure a trigger, read-only permissions, tools, and safe outputs.
+- Compile the Markdown into a hardened GitHub Actions workflow.
+- Run the workflow and review its issue, comment, pull request, or no-op.
+- Submit the workflow source and generated lock file in a pull request.
+
+## Start the workshop
+
+1. Create a repository from this template in the workshop organization.
+2. Select **Code > Codespaces > Create codespace on main**.
+3. The Codespace automatically starts **Seed Workshop**.
+4. When that run finishes, open the generated **Start here: Build your first agentic workflow** issue.
+
+No local installation or repository secret is required. The Codespace installs the pinned gh-aw CLI and validates the solution. Copilot inference uses the managed organization's GitHub Actions token through `copilot-requests: write`.
+
+## Existing demonstrations
+
+| Workflow | What it demonstrates |
+| --- | --- |
+| `.github/workflows/docs-updater.md` | Compares code and documentation, then creates a focused issue. |
+| `.github/workflows/test-quality-checker.md` | Distinguishes meaningful unhappy-flow tests from superficial coverage. |
+| `.github/workflows/duplicate-code-detector.md` | Uses contextual judgment to report worthwhile duplication. |
+
+All three workflows are manually triggered, keep the agent job read-only, avoid duplicate issues, and use explicit no-op behavior.
+
+## Participant assignments
+
+The seed workflow creates four assignment issues:
+
+| Level | Assignment | Safe output |
 | --- | --- | --- |
-| Documentation updater/checker | `.github\workflows\docs-updater.md` | Finds documentation drift after code changes and creates focused documentation issues. |
-| Test quality checker | `.github\workflows\test-quality-checker.md` | Reviews whether unhappy flows are covered by meaningful tests. |
-| Duplicate code detector | `.github\workflows\duplicate-code-detector.md` | Finds repeated source-code patterns and creates focused refactoring issues. |
+| Beginner | Observability gap finder | Create an issue |
+| Beginner | API error contract reviewer | Create an issue |
+| Advanced | Pull request test-plan reviewer | Add a PR comment |
+| Advanced | API reference generator | Create a draft PR |
 
-## Prerequisites
+Assignment workflow files are deliberately not included. Each participant implements one.
 
-- .NET 10 SDK
-- Optional: GitHub CLI plus the Agentic Workflows extension for running workflows locally:
+## Repository commands
 
-```powershell
-gh extension install github/gh-aw
+```bash
+dotnet restore AgenticWorkflows.slnx
+dotnet build AgenticWorkflows.slnx
+dotnet test AgenticWorkflows.slnx
+gh aw compile --validate
 ```
 
-## Run the app
+Run the API with the **Workshop: Run API** VS Code task or:
 
-```powershell
-dotnet restore .\AgenticWorkflows.slnx
-dotnet run --project .\src\AgenticWorkflows.Api\AgenticWorkflows.Api.csproj --urls http://localhost:5000
+```bash
+dotnet run --project src/AgenticWorkflows.Api/AgenticWorkflows.Api.csproj --urls http://localhost:5154
 ```
 
-The API exposes:
+## Guides
 
-| Method | Route | Purpose |
-| --- | --- | --- |
-| `GET` | `/work-items` | List seeded and created work items. |
-| `POST` | `/work-items` | Create a new work item with validation. |
-| `GET` | `/work-items/summary` | Return open/done/priority summary information. |
-| `GET` | `/work-items/{id}/notifications` | Return demo notification text for a work item. |
-
-Example create request:
-
-```powershell
-curl -Method Post http://localhost:5000/work-items `
-  -ContentType 'application/json' `
-  -Body '{"title":"Update the demo guide","description":"Add the new endpoint.","priority":3,"dueDate":"2026-06-05"}'
-```
-
-## Run tests
-
-```powershell
-dotnet test .\AgenticWorkflows.slnx
-```
-
-The test project intentionally contains both meaningful tests and a couple of low-value tests in `WeakCoverageTests.cs`. That gives the test-quality workflow something concrete to critique during a demo while keeping the suite green.
-
-## Agentic workflow demo flow
-
-If the workflows do not appear in the GitHub Actions tab yet, compile the lock files manually. You can run `gh aw compile --validate --purge` locally, or run **Compile Agentic Workflows** from the Actions tab and download the generated artifact. Commit the generated `.lock.yml` files yourself so the demos remain manually controlled.
-
-1. **Documentation updater**: change an endpoint, model, or command in the app without updating docs, then run `gh aw run docs-updater`.
-2. **Test quality checker**: inspect the existing tests or add a superficial test, then run `gh aw run test-quality-checker`.
-3. **Duplicate code detector**: review `NotificationComposer`, which intentionally contains similar formatting logic, then run `gh aw run duplicate-code-detector`.
-
-Compile workflow lock files after editing workflow frontmatter:
-
-```powershell
-gh aw compile
-```
-
-The markdown workflow files are the source of truth. The generated `.lock.yml` files should be committed when `gh aw` is available. The demo workflows are intentionally `workflow_dispatch` only; they do not run from automatic triggers.
-
-For the first repository setup, also configure the Copilot engine secret before running an agentic workflow:
-
-1. Create a fine-grained PAT with Copilot Requests read permission.
-2. Add it as the repository Actions secret `COPILOT_GITHUB_TOKEN`.
-
-See `docs\demo-guide.md` for a presenter-oriented walkthrough and `docs\agentic-workflows.md` for workflow design notes.
+- [Participant workshop guide](docs/workshop-guide.md)
+- [Facilitator demo guide](docs/demo-guide.md)
+- [Agentic workflow design notes](docs/agentic-workflows.md)
+- [Facilitator preflight](docs/facilitator-preflight.md)

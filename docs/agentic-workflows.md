@@ -1,49 +1,50 @@
 # Agentic workflow design notes
 
-GitHub Agentic Workflows use markdown files with YAML frontmatter. The frontmatter defines triggers, permissions, tools, network access, and safe outputs. The markdown body contains the natural-language task instructions for the coding agent.
+GitHub Agentic Workflows combine YAML frontmatter with natural-language task instructions. The Markdown file is the editable source; `gh aw compile` generates the hardened `.lock.yml` consumed by GitHub Actions.
 
-In this repo, workflow source files live in `.github\workflows`:
+## Repository examples
 
-| Workflow | Trigger | Main safe output | Purpose |
-| --- | --- | --- | --- |
-| `docs-updater.md` | Manual dispatch only | Issue | Compare current code behavior with docs and open actionable issues for missing documentation updates. |
-| `test-quality-checker.md` | Manual dispatch only | Issue | Report missing or weak unhappy-flow test coverage with a concrete fix table. |
-| `duplicate-code-detector.md` | Manual dispatch only | Issue | Report meaningful duplicate code patterns with concrete refactoring guidance. |
+| Workflow | Trigger | Safe output |
+| --- | --- | --- |
+| `docs-updater.md` | Manual | Create issue |
+| `test-quality-checker.md` | Manual | Create issue |
+| `duplicate-code-detector.md` | Manual | Create issue |
 
-## Safety posture
+## Security model
 
-The workflows are designed for demos and use conservative defaults:
+- Repository permissions remain read-only for the agent job.
+- `copilot-requests: write` authenticates inference with the short-lived GitHub Actions token and the managed organization's Copilot entitlement.
+- Participants do not create or store `COPILOT_GITHUB_TOKEN`.
+- GitHub mutations use `safe-outputs`, not direct write scopes or shell commands.
+- Every workflow defines when to use `noop`.
+- Issue and comment workflows check for equivalent existing output before writing.
 
-- Read-only repository permissions for the agentic portion.
-- `safe-outputs` for issue creation.
-- Human review before acting on AI-generated recommendations.
-- Small maximum output counts to avoid noisy runs.
-- Manual `workflow_dispatch` triggers only, so demos run when a presenter starts them.
+## Compilation
 
-## Compile model
-
-The markdown files are the editable source of truth. `gh aw compile` generates `.lock.yml` GitHub Actions workflow files with hardened execution details.
-
-```powershell
-gh aw compile
-```
-
-Commit both the source `.md` files and generated `.lock.yml` files when the Agentic Workflows CLI is available.
-
-If the workflows do not appear in the GitHub Actions tab, generate lock files first. The preferred local command is:
+The repository pins gh-aw `v0.83.1` in Codespaces and setup workflows.
 
 ```bash
 gh aw compile --validate --purge
 ```
 
-If local `gh-aw` is unavailable, run **Compile Agentic Workflows** from the Actions tab, download the `compiled-agentic-workflows` artifact, and commit the generated files manually. The compiler workflow does not push changes itself because demo workflows should remain manually controlled and GitHub's default Actions token cannot update workflow files in this scenario.
+Commit the workflow source, generated lock file, and `.github/aw/actions-lock.json` changes together. Never hand-edit a `.lock.yml`.
 
-After the generated lock files are present on the default branch, the individual agentic workflows appear as manually runnable GitHub Actions.
+## Participant design checklist
 
-The default engine is Copilot. Before running the compiled workflows, add the repository Actions secret `COPILOT_GITHUB_TOKEN` as described in the gh-aw authentication docs.
+1. Does the trigger match the assignment?
+2. Are repository permissions read-only?
+3. Is `copilot-requests: write` present?
+4. Are the enabled read tools minimal?
+5. Does each visible write use the requested safe output?
+6. Is `create-pull-request.allowed-files` restricted?
+7. Does the prompt define useful evidence and ignore low-value findings?
+8. Does it search for duplicate output where applicable?
+9. Does it explicitly use `noop` when no write is needed?
+10. Does compilation finish with no warnings?
 
-## Demo-specific code hooks
+## Demo hooks in the application
 
-- `WorkItemService` has validation and summary behavior that documentation and tests can reason about.
-- `WeakCoverageTests` contains intentionally weak tests to demonstrate that unhappy-flow coverage and meaningful assertions matter more than line coverage alone.
-- `NotificationComposer` contains a bounded duplicated pattern for the duplicate-code detector demo.
+- `WorkItemService` contains validation, ordering, lookup, and summary behavior.
+- `WeakCoverageTests` intentionally contains superficial assertions.
+- `NotificationComposer` contains bounded duplication.
+- The seeded sample PR adds a status and updates only a weak enum-count test, giving the advanced reviewer a concrete risk to analyze.

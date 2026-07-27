@@ -2,8 +2,12 @@
   "github.copilot.enable": {
     "markdown": true
   },
+  "dotnet.defaultSolution": "AgenticWorkflows.slnx",
   "remote.autoForwardPortsFallback": 0,
   "search.exclude": {
+    ".github/workflows/*.lock.yml": true
+  },
+  "files.readonlyInclude": {
     ".github/workflows/*.lock.yml": true
   }
 }
