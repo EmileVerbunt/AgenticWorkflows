@@ -5,11 +5,13 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 cd "${ROOT_DIR}"
 bash .devcontainer/install-gh-aw.sh
+bash .devcontainer/install-copilot-cli.sh
 
 echo
 echo "Agentic Workflows workshop ready"
 echo "---------------------------------"
 echo "gh-aw: $(gh aw version 2>&1 | head -n 1)"
+echo "Copilot CLI: $(copilot --version 2>&1 | head -n 1)"
 echo ".NET:  $(dotnet --version)"
 echo "Copilot auth: managed organization token; no repository secret required"
 

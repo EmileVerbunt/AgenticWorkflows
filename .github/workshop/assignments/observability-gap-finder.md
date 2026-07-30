@@ -40,6 +40,9 @@ Ask the agent to:
 
 ## Run and submit
 
+<details>
+<summary>Commands</summary>
+
 ```bash
 gh aw compile observability-gap-finder --validate
 git add .github/workflows/observability-gap-finder.md \
@@ -56,5 +59,7 @@ git switch main
 git pull --ff-only
 gh aw run observability-gap-finder
 ```
+
+</details>
 
 Add the run link and result as a comment on the merged participant pull request.

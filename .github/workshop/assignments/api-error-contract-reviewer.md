@@ -41,6 +41,9 @@ Ask the agent to:
 
 ## Run and submit
 
+<details>
+<summary>Commands</summary>
+
 ```bash
 gh aw compile api-error-contract-reviewer --validate
 git add .github/workflows/api-error-contract-reviewer.md \
@@ -57,5 +60,7 @@ git switch main
 git pull --ff-only
 gh aw run api-error-contract-reviewer
 ```
+
+</details>
 
 Add the run link and result as a comment on the merged participant pull request.

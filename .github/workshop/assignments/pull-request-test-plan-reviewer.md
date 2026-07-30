@@ -45,6 +45,9 @@ Keep the comment short enough for a developer to act on during review.
 
 ## Run and submit
 
+<details>
+<summary>Commands</summary>
+
 ```bash
 gh aw compile pull-request-test-plan-reviewer --validate
 git add .github/workflows/pull-request-test-plan-reviewer.md \
@@ -61,5 +64,7 @@ git switch main
 git pull --ff-only
 gh aw run pull-request-test-plan-reviewer
 ```
+
+</details>
 
 Add the run link and result as a comment on the merged participant pull request.

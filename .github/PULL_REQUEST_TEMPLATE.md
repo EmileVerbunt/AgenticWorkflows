@@ -21,8 +21,8 @@
 
 ## After merge
 
-Manual workflows can only be dispatched after this pull request is merged to `main`. After merging:
+For a manual workflow, merge it to `main` before dispatching it. For a pull-request workflow:
 
-1. Run the workflow.
-2. Add a comment to this pull request with the run URL.
+1. Confirm the pull request matches its configured event and path filters.
+2. Wait for the workflow check to complete.
 3. Link the observed issue, comment, pull request, or explicit no-op.
