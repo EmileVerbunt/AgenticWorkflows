@@ -527,6 +527,13 @@ The same pattern can automate much more:
 
 Start with a narrow question, one safe output, and a clear `noop`. Expand only after the small workflow is useful and trustworthy.
 
+More guided workflow ideas are available in [`samples/`](samples/):
+
+- [API error contract reviewer](samples/api-error-contract-reviewer.md)
+- [API reference generator](samples/api-reference-generator.md)
+- [Observability gap finder](samples/observability-gap-finder.md)
+- [Pull-request test-plan reviewer](samples/pull-request-test-plan-reviewer.md)
+
 ## Troubleshooting
 
 <details>
