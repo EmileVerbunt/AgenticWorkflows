@@ -5,6 +5,8 @@ description: |
 
 on:
   workflow_dispatch:
+  pull_request:
+    types: [opened]
 
 permissions:
   contents: read

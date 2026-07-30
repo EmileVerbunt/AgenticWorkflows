@@ -22,7 +22,7 @@ The workshop takes about **45 minutes**. No previous GitHub Actions or agentic-w
 | 5-10 minutes | Learn frontmatter, instructions, compilation, and safe outputs. |
 | 10-16 minutes | Compile and merge the prebuilt workflow; start its manual run. |
 | 16-27 minutes | Complete, compile, and merge another workflow; start its run. |
-| 27-35 minutes | Add and merge the test-only PR trigger. |
+| 27-35 minutes | Refine and merge the test-only PR behavior. |
 | 35-40 minutes | Weaken the sample test and open a pull request. |
 | 40-45 minutes | Inspect the automatic comment and explore next ideas. |
 
@@ -192,7 +192,7 @@ See the [complete safe-output reference](https://github.github.com/gh-aw/referen
 
 Open `.github/workflows/test-quality-checker.md` and find:
 
-- `on: workflow_dispatch`
+- `workflow_dispatch` and `pull_request` on newly opened PRs
 - read-only permissions plus `copilot-requests: write`
 - `safe-outputs: create-issue`
 - the instructions describing useful and weak tests
@@ -239,6 +239,8 @@ gh aw status
 ```
 
 The run should create a test-quality issue or explicitly report a no-op. You can continue to Step 4 while it runs.
+
+The workflow also runs automatically when later pull requests are opened. Until Step 5, those automatic runs use the same issue output as manual runs.
 
 ## Step 4: Create another workflow
 
@@ -364,11 +366,11 @@ Fix every compile warning in the Markdown source. Never edit a generated `.lock.
 
 **Checkpoint:** your workflow is merged and its manual run has started. Continue while it runs.
 
-## Step 5: Add the test-only pull-request trigger
+## Step 5: Refine pull-request review for test changes
 
-The Test Quality Checker should keep its manual issue-producing behavior and also review pull requests whenever a file under `tests/**` changes.
+The prebuilt workflow already runs manually and when a pull request is opened. Now refine its PR behavior so it runs only for test changes, reruns when the PR changes, and comments directly on the PR.
 
-The trigger must be merged to `main` **before** opening the test-change PR. A pull request cannot activate a new PR trigger that exists only inside that same pull request.
+The refinement must be merged to `main` **before** opening the test-change PR so that PR uses the new path filter and comment output.
 
 Create a branch:
 
@@ -384,9 +386,9 @@ Update .github/workflows/test-quality-checker.md using https://raw.githubusercon
 
 Do not install, upgrade, or downgrade gh-aw. Use the installed v0.83.1 CLI.
 
-Keep the existing workflow_dispatch trigger and create-issue behavior for manual runs.
+Keep the existing workflow_dispatch trigger, pull_request opened trigger, and create-issue behavior for manual runs.
 
-Also run on pull_request events for opened, synchronize, and reopened, but only when files under tests/** change. Keep the agent job read-only. Add the add-comment safe output for the triggering pull request.
+Refine pull_request to run for opened, synchronize, and reopened, but only when files under tests/** change. Keep the agent job read-only. Add the add-comment safe output for the triggering pull request.
 
 For pull-request runs, review the changed test files and relevant production behavior. Post one concise pull-request comment with:
 - what the changed tests cover well
@@ -443,7 +445,7 @@ git pull --ff-only
 
 </details>
 
-**Checkpoint:** the PR trigger is now present on `main`.
+**Checkpoint:** the test-only PR trigger and comment output are now present on `main`.
 
 ## Step 6: Create the test-change pull request
 
@@ -508,7 +510,7 @@ When the workflow completes, refresh the pull request. The Test Quality Checker 
 - [ ] You compiled and manually ran the prebuilt Test Quality Checker.
 - [ ] You completed a starter workflow or created a small workflow of your own.
 - [ ] You compiled and manually ran your workflow.
-- [ ] The test-quality PR trigger is merged to `main`.
+- [ ] The refined test-only PR trigger and comment output are merged to `main`.
 - [ ] You opened a separate pull request changing a file under `tests/**`.
 - [ ] The workflow ran automatically.
 - [ ] The pull request contains the workflow's comment or an explicit no-op result.
@@ -553,7 +555,7 @@ Confirm its generated `.lock.yml` is merged to `main`. Manual workflows must exi
 <details>
 <summary>The test pull-request workflow did not start</summary>
 
-Confirm the trigger update was merged before the test PR was created, the test PR changes a file under `tests/**`, and the generated lock file contains the `pull_request` trigger.
+Confirm the trigger refinement was merged before the test PR was created, the test PR changes a file under `tests/**`, and the generated lock file contains the path-filtered `pull_request` trigger.
 
 </details>
 
