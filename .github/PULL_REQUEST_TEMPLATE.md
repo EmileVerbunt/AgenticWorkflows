@@ -1,6 +1,6 @@
 ## Workflow
 
-- Assignment issue:
+- Workshop step:
 - Workflow ID:
 - Goal:
 

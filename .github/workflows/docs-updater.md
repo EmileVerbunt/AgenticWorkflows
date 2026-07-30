@@ -20,7 +20,6 @@ network:
 safe-outputs:
   create-issue:
     title-prefix: "[docs] "
-    labels: [automation, documentation]
     max: 3
 
 tools:

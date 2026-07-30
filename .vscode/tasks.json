@@ -2,17 +2,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Workshop: Seed repository",
-      "type": "process",
-      "command": "gh",
-      "args": [
-        "workflow",
-        "run",
-        "seed-workshop.yml"
-      ],
-      "problemMatcher": []
-    },
-    {
       "label": "Workshop: Restore solution",
       "type": "process",
       "command": "dotnet",
