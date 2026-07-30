@@ -19,7 +19,6 @@ network:
 safe-outputs:
   create-issue:
     title-prefix: "[duplicate-code] "
-    labels: [automation, code-quality]
     group: true
     max: 3
 

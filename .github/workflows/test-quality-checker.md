@@ -20,7 +20,6 @@ network:
 safe-outputs:
   create-issue:
     title-prefix: "[test-quality] "
-    labels: [automation, testing]
     max: 3
 
 tools:

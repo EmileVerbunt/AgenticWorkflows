@@ -1,20 +1,34 @@
 # Build Your First Agentic Workflow
 
-In this workshop you will compile and run a prebuilt GitHub Agentic Workflow, create a small workflow, and then make the first workflow review test changes automatically on pull requests.
+In this workshop you will compile and run a prebuilt GitHub Agentic Workflow, create a small workflow, and make the first workflow review test changes automatically on pull requests.
 
 The workshop takes about **45 minutes**. No previous GitHub Actions or agentic-workflow experience is required.
 
 ## Workshop flow
 
-1. Install and verify the prerequisites.
-2. Learn what an agentic workflow is.
-3. Compile, commit, and manually run the prebuilt test-quality workflow.
-4. Complete one of two starters or create your own workflow, then compile and run it.
-5. Update the test-quality workflow to run automatically for pull requests that change `tests/**`.
-6. Make a test change and open a pull request.
-7. Watch the workflow review the change and post a pull-request comment.
+1. Verify the prerequisites.
+2. Learn what an agentic workflow and a safe output are.
+3. Compile, merge, and manually run the prebuilt Test Quality Checker.
+4. Complete one starter or create your own workflow, then compile, merge, and run it.
+5. Update the Test Quality Checker to review pull requests changing `tests/**`.
+6. Merge that workflow update before creating a separate test-change pull request.
+7. Watch the workflow run automatically and post its findings as a PR comment.
 
-## Step 1: Install and verify the prerequisites
+## 45-minute plan
+
+| Time | Activity |
+| --- | --- |
+| 0-5 minutes | Start Codespaces and verify the setup. |
+| 5-10 minutes | Learn frontmatter, instructions, compilation, and safe outputs. |
+| 10-16 minutes | Compile and merge the prebuilt workflow; start its manual run. |
+| 16-27 minutes | Complete, compile, and merge another workflow; start its run. |
+| 27-35 minutes | Add and merge the test-only PR trigger. |
+| 35-40 minutes | Weaken the sample test and open a pull request. |
+| 40-45 minutes | Inspect the automatic comment and explore next ideas. |
+
+**Fast path:** choose the duplicate-code starter, keep one trigger and one safe output, and continue to the next step while workflow runs complete in the background.
+
+## Step 1: Verify the prerequisites
 
 ### Recommended: GitHub Codespaces
 
@@ -30,10 +44,12 @@ The Codespace installs:
 - GitHub Copilot and C# VS Code extensions
 - pinned `gh aw` v0.83.1
 
-You also need a GitHub Copilot seat and GitHub Actions enabled under **Settings > Actions**.
+It also creates a repository ruleset that requires all changes to `main` to use pull requests. No approving review is required, so you can merge your own workshop PRs.
+
+You need a GitHub Copilot seat and GitHub Actions enabled under **Settings > Actions**.
 
 <details>
-<summary>Verify the Codespace</summary>
+<summary>Verify the Codespace and repository rules</summary>
 
 ```bash
 gh auth status
@@ -41,6 +57,13 @@ gh aw version
 copilot --version
 dotnet --version
 dotnet test AgenticWorkflows.slnx
+gh api "repos/{owner}/{repo}/rulesets?includes_parents=true" --jq '.[].name'
+```
+
+Replace `{owner}/{repo}` with your participant repository. The output should include:
+
+```text
+Workshop: Require pull requests
 ```
 
 Expected gh-aw version:
@@ -48,6 +71,19 @@ Expected gh-aw version:
 ```text
 gh aw version v0.83.1
 ```
+
+</details>
+
+<details>
+<summary>If the ruleset could not be created automatically</summary>
+
+Open **Settings > Rules > Rulesets > New branch ruleset**:
+
+1. Name it `Workshop: Require pull requests`.
+2. Target the default branch.
+3. Enable **Require a pull request before merging**.
+4. Set required approvals to `0`.
+5. Enable the ruleset.
 
 </details>
 
@@ -70,18 +106,89 @@ Run `gh auth login` when GitHub CLI reports that authentication is required.
 
 </details>
 
-## Step 2: What is an agentic workflow?
+## Step 2: Understand agentic workflows and safe outputs
 
 An agentic workflow is a Markdown file in `.github/workflows/`.
 
 It has two parts:
 
-1. **YAML frontmatter** between `---` markers. This defines when the workflow runs, what it may read, which tools it can use, and which safe outputs it may create.
+1. **YAML frontmatter** between `---` markers. This defines when the workflow runs, what it may read, which tools it can use, and which safe outputs it may request.
 2. **Natural-language instructions** after the frontmatter. These explain what the agent should investigate, what a useful result looks like, and when it should use `noop`.
 
 `gh aw compile` validates the Markdown and creates a hardened `.lock.yml` file that GitHub Actions can run.
 
-The main agent receives read-only repository permissions. Visible changes such as issues, comments, and pull requests are handled by controlled safe outputs.
+### What is a safe output?
+
+A safe output is a controlled GitHub write operation declared under `safe-outputs:`.
+
+The agent itself remains read-only. It requests an operation using structured output, and a separate permission-controlled job validates and performs that operation. This limits what can be changed, how many changes can be made, and where they can be applied.
+
+Examples include:
+
+| Safe output | What it can do | Example use |
+| --- | --- | --- |
+| `create-issue` | Open a new issue | Report a test-quality gap |
+| `add-comment` | Comment on an issue or PR | Review changed tests |
+| `create-pull-request` | Propose file changes in a PR | Update stale documentation |
+| `add-labels` | Add allowed labels | Triage incoming issues |
+| `update-issue` | Update selected issue fields | Maintain a generated status section |
+
+`noop` is always available. It is the correct result when the workflow succeeds but finds nothing useful to change.
+
+<details>
+<summary>Five safe-output configuration examples</summary>
+
+Create one focused issue:
+
+```yaml
+safe-outputs:
+  create-issue:
+    title-prefix: "[quality] "
+    max: 1
+```
+
+Comment once on the triggering pull request and hide the workflow's older comment:
+
+```yaml
+safe-outputs:
+  add-comment:
+    max: 1
+    hide-older-comments: true
+```
+
+Create a draft documentation PR restricted to Markdown files:
+
+```yaml
+safe-outputs:
+  create-pull-request:
+    draft: true
+    allowed-files:
+      - "**/*.md"
+    max: 1
+```
+
+Add only approved triage labels:
+
+```yaml
+safe-outputs:
+  add-labels:
+    allowed: [bug, documentation, enhancement]
+    max: 2
+```
+
+Allow a workflow to update the triggering issue body:
+
+```yaml
+safe-outputs:
+  update-issue:
+    body: true
+    target: "triggering"
+    max: 1
+```
+
+</details>
+
+See the [complete safe-output reference](https://github.github.com/gh-aw/reference/safe-outputs/) for many more output types and configuration options.
 
 Open `.github/workflows/test-quality-checker.md` and find:
 
@@ -91,71 +198,63 @@ Open `.github/workflows/test-quality-checker.md` and find:
 - the instructions describing useful and weak tests
 - the explicit `noop` behavior
 
-## Step 3: Compile the prebuilt test-quality workflow
+## Step 3: Compile and merge the prebuilt workflow
 
-The workflow source is complete, but its generated lock file is intentionally absent.
+The Test Quality Checker source is complete, but its generated lock file is intentionally absent.
 
-Compile it:
+Create a branch and compile:
 
 ```bash
+git switch -c workshop/compile-test-quality
 gh aw compile test-quality-checker --validate
 ```
 
 The command creates `.github/workflows/test-quality-checker.lock.yml`.
 
-Commit and push the generated workflow to `main`:
-
 <details>
-<summary>Commit commands</summary>
+<summary>Commit, open, and merge the pull request</summary>
 
 ```bash
 git add .github/workflows/test-quality-checker.lock.yml \
   .github/aw/actions-lock.json
 git commit -m "Compile test quality checker"
-git push
+git push -u origin HEAD
+gh pr create --fill
+gh pr merge --squash --delete-branch
+git switch main
+git pull --ff-only
 ```
 
 If `.github/aw/actions-lock.json` did not change, Git ignores it.
 
 </details>
 
-## Step 4: Run the prebuilt workflow
+**Checkpoint:** the generated lock file now exists on `main`.
 
-The lock file must be on `main` before GitHub can dispatch the workflow.
+Run the workflow:
 
 ```bash
 gh aw run test-quality-checker
 gh aw status
 ```
 
-Open the run when it completes. The workflow should create a test-quality issue or explicitly report a no-op.
+The run should create a test-quality issue or explicitly report a no-op. You can continue to Step 4 while it runs.
 
-## Step 5: Create another workflow
+## Step 4: Create another workflow
 
-Choose one small workflow:
+Choose one small workflow.
 
 ### Option A: Documentation updater
 
 Complete `.github/workflows/docs-updater.md`. Its frontmatter is present, but its instruction body is empty.
 
-The finished workflow should:
-
-- run daily and manually
-- identify documentation that no longer matches the code
-- open a pull request containing only necessary documentation changes
-- use `noop` when everything is current
+It should run daily and manually, identify stale documentation, open a documentation-only PR, and use `noop` when everything is current.
 
 ### Option B: Duplicate-code detector
 
 Complete `.github/workflows/duplicate-code-detector.md`. Its frontmatter is present, but its instruction body is empty.
 
-The finished workflow should:
-
-- run manually
-- inspect production code
-- ignore tests, generated files, boilerplate, and trivial similarities
-- avoid reporting an equivalent open issue
-- open focused refactoring issues or use `noop`
+It should run manually, ignore trivial similarities, avoid duplicate reports, and open focused refactoring issues or use `noop`.
 
 ### Option C: Your own workflow
 
@@ -181,7 +280,9 @@ Answer:
 
 ### Ask Copilot to create it
 
-Use Copilot Chat in VS Code Agent mode, or run `copilot` in the terminal and use `/diff` to review its changes.
+**Recommended:** use Copilot Chat in VS Code Agent mode.
+
+Alternatively, run `copilot` from the repository root, confirm that you trust the folder, use `/login` if prompted, and use `/diff` to review changes.
 
 <details>
 <summary>Prompt: Documentation updater</summary>
@@ -189,11 +290,13 @@ Use Copilot Chat in VS Code Agent mode, or run `copilot` in the terminal and use
 ```text
 Create a workflow for GitHub Agentic Workflows using https://raw.githubusercontent.com/github/gh-aw/main/create.md
 
+Do not install, upgrade, or downgrade gh-aw. Use the installed v0.83.1 CLI.
+
 Complete .github/workflows/docs-updater.md.
 
 The workflow should run daily and keep repository documentation up to date. Identify documentation files that are out of sync with recent code changes and open a pull request with only the necessary documentation updates.
 
-Also support workflow_dispatch so we can test it during the workshop. Keep repository access read-only, restrict the pull request to documentation files, and use noop when no update is needed.
+Also support workflow_dispatch so we can test it during the workshop. Keep repository access read-only, restrict the pull request to Markdown files, and use noop when no update is needed.
 ```
 
 </details>
@@ -203,6 +306,8 @@ Also support workflow_dispatch so we can test it during the workshop. Keep repos
 
 ```text
 Create a workflow for GitHub Agentic Workflows using https://raw.githubusercontent.com/github/gh-aw/main/create.md
+
+Do not install, upgrade, or downgrade gh-aw. Use the installed v0.83.1 CLI.
 
 Complete .github/workflows/duplicate-code-detector.md.
 
@@ -217,6 +322,8 @@ The workflow should run on demand and detect meaningful duplicate or near-duplic
 ```text
 Create a workflow for GitHub Agentic Workflows using https://raw.githubusercontent.com/github/gh-aw/main/create.md
 
+Do not install, upgrade, or downgrade gh-aw. Use the installed v0.83.1 CLI.
+
 Create .github/workflows/<workflow-id>.md.
 
 The workflow should <describe the small task>.
@@ -230,18 +337,23 @@ Keep repository access read-only and support workflow_dispatch so we can test it
 
 </details>
 
-Compile, commit, push, and run the workflow:
+Create a branch, compile, and merge:
 
 <details>
 <summary>Commands</summary>
 
 ```bash
+git switch -c workshop/<workflow-id>
 gh aw compile <workflow-id> --validate
 git add .github/workflows/<workflow-id>.md \
   .github/workflows/<workflow-id>.lock.yml \
   .github/aw/actions-lock.json
 git commit -m "Add <workflow-id> agentic workflow"
-git push
+git push -u origin HEAD
+gh pr create --fill
+gh pr merge --squash --delete-branch
+git switch main
+git pull --ff-only
 gh aw run <workflow-id>
 gh aw status
 ```
@@ -250,25 +362,27 @@ gh aw status
 
 Fix every compile warning in the Markdown source. Never edit a generated `.lock.yml` by hand.
 
-## Step 6: Run the test-quality workflow on test pull requests
+**Checkpoint:** your workflow is merged and its manual run has started. Continue while it runs.
 
-Now evolve the prebuilt workflow. It should keep its manual trigger and issue output, but also review pull requests whenever a file under `tests/**` changes.
+## Step 5: Add the test-only pull-request trigger
 
-For pull-request runs, it should post one concise comment on the triggering pull request instead of creating an issue.
+The Test Quality Checker should keep its manual issue-producing behavior and also review pull requests whenever a file under `tests/**` changes.
 
-Create the pull-request branch:
+The trigger must be merged to `main` **before** opening the test-change PR. A pull request cannot activate a new PR trigger that exists only inside that same pull request.
+
+Create a branch:
 
 ```bash
-git switch -c workshop/test-quality-pr
+git switch -c workshop/test-quality-trigger
 ```
-
-Ask Copilot to update the workflow:
 
 <details>
 <summary>Copy-paste update prompt</summary>
 
 ```text
 Update .github/workflows/test-quality-checker.md using https://raw.githubusercontent.com/github/gh-aw/main/create.md.
+
+Do not install, upgrade, or downgrade gh-aw. Use the installed v0.83.1 CLI.
 
 Keep the existing workflow_dispatch trigger and create-issue behavior for manual runs.
 
@@ -284,14 +398,6 @@ Do not create an issue during a pull-request run. Avoid duplicate comments and u
 ```
 
 </details>
-
-Review the result. The frontmatter should now include:
-
-- the existing `workflow_dispatch`
-- `pull_request` with `types: [opened, synchronize, reopened]`
-- `paths` restricted to `tests/**`
-- the existing `create-issue` safe output
-- an `add-comment` safe output
 
 <details>
 <summary>Expected trigger and safe-output shape</summary>
@@ -309,7 +415,6 @@ on:
 safe-outputs:
   create-issue:
     title-prefix: "[test-quality] "
-    labels: [automation, testing]
     max: 3
   add-comment:
     max: 1
@@ -318,19 +423,39 @@ safe-outputs:
 
 </details>
 
-Compile the updated workflow:
+Compile, open a PR, and merge the trigger before continuing:
+
+<details>
+<summary>Commands</summary>
 
 ```bash
 gh aw compile test-quality-checker --validate
+git add .github/workflows/test-quality-checker.md \
+  .github/workflows/test-quality-checker.lock.yml \
+  .github/aw/actions-lock.json
+git commit -m "Review test changes on pull requests"
+git push -u origin HEAD
+gh pr create --fill
+gh pr merge --squash --delete-branch
+git switch main
+git pull --ff-only
 ```
 
-Do not push this change to `main` yet. It will be part of the pull request in the next step.
+</details>
 
-## Step 7: Make a test change
+**Checkpoint:** the PR trigger is now present on `main`.
+
+## Step 6: Create the test-change pull request
+
+Create a separate branch:
+
+```bash
+git switch -c workshop/weaken-test
+```
 
 Open `tests/AgenticWorkflows.Api.Tests/WeakCoverageTests.cs`.
 
-Make the existing summary-health test deliberately weaker by replacing:
+Replace:
 
 ```csharp
 Assert.False(string.IsNullOrWhiteSpace(summary.Health));
@@ -342,36 +467,27 @@ with:
 Assert.NotNull(summary.Health);
 ```
 
-This test still passes, but it provides less confidence. That gives the workflow something useful to review.
-
-Run the tests:
+The test still passes, but it provides less confidence. That gives the workflow something useful to review.
 
 ```bash
 dotnet test AgenticWorkflows.slnx
 ```
 
-## Step 8: Commit and create the pull request
-
-Commit the workflow update, generated lock file, and test change together:
-
 <details>
-<summary>Commit and PR commands</summary>
+<summary>Commit and create the pull request</summary>
 
 ```bash
-git add .github/workflows/test-quality-checker.md \
-  .github/workflows/test-quality-checker.lock.yml \
-  .github/aw/actions-lock.json \
-  tests/AgenticWorkflows.Api.Tests/WeakCoverageTests.cs
-git commit -m "Review test changes with test quality checker"
+git add tests/AgenticWorkflows.Api.Tests/WeakCoverageTests.cs
+git commit -m "Weaken summary health assertion"
 git push -u origin HEAD
 gh pr create --fill
 ```
 
 </details>
 
-The pull request changes a file under `tests/**`, so the updated workflow should start automatically.
+Do not merge this pull request yet.
 
-## Step 9: Watch the automatic review
+## Step 7: Watch the automatic review
 
 Watch the pull-request checks:
 
@@ -385,31 +501,52 @@ You can also open the **Actions** tab or run:
 gh aw status
 ```
 
-When the workflow completes, refresh the pull request. The Test Quality Checker should post its findings as a pull-request comment, or explicitly no-op if it finds no actionable problem.
+When the workflow completes, refresh the pull request. The Test Quality Checker should post its findings as a PR comment, or explicitly no-op if it finds no actionable problem.
 
 ## You are done when
 
-- [ ] You compiled and manually ran the prebuilt test-quality workflow.
+- [ ] You compiled and manually ran the prebuilt Test Quality Checker.
 - [ ] You completed a starter workflow or created a small workflow of your own.
 - [ ] You compiled and manually ran your workflow.
-- [ ] The test-quality workflow listens to pull requests changing `tests/**`.
-- [ ] You opened a pull request with a test change.
+- [ ] The test-quality PR trigger is merged to `main`.
+- [ ] You opened a separate pull request changing a file under `tests/**`.
 - [ ] The workflow ran automatically.
 - [ ] The pull request contains the workflow's comment or an explicit no-op result.
+
+## The art of the possible
+
+The same pattern can automate much more:
+
+| Trigger | Agent judgment | Safe output |
+| --- | --- | --- |
+| Every morning | Summarize repository activity and risks | `create-issue` |
+| Pull request opened | Review tests, docs, security, or architecture | `add-comment` |
+| Documentation drift found | Prepare the smallest useful update | `create-pull-request` |
+| New issue opened | Classify intent and ownership | `add-labels` |
+| Milestone review | Refresh a generated status section | `update-issue` |
+
+Start with a narrow question, one safe output, and a clear `noop`. Expand only after the small workflow is useful and trustworthy.
 
 ## Troubleshooting
 
 <details>
-<summary>The workflow does not appear in GitHub Actions</summary>
+<summary>A push to <code>main</code> is rejected</summary>
 
-Confirm its generated `.lock.yml` is committed and pushed. Manual workflows must exist on `main` before they can be dispatched.
+That is expected. Create a branch, push it, open a pull request, and merge the PR.
 
 </details>
 
 <details>
-<summary>The pull-request workflow did not start</summary>
+<summary>The workflow does not appear in GitHub Actions</summary>
 
-Confirm the pull request contains a changed file under `tests/**` and the generated lock file includes the `pull_request` trigger.
+Confirm its generated `.lock.yml` is merged to `main`. Manual workflows must exist on the default branch before they can be dispatched.
+
+</details>
+
+<details>
+<summary>The test pull-request workflow did not start</summary>
+
+Confirm the trigger update was merged before the test PR was created, the test PR changes a file under `tests/**`, and the generated lock file contains the `pull_request` trigger.
 
 </details>
 
@@ -434,18 +571,8 @@ Rebuild the Codespace container. It installs or repairs both CLIs during creatio
 
 </details>
 
-<details>
-<summary>Facilitator preflight</summary>
-
-1. Confirm the repository is configured as a template.
-2. Confirm participants can create repositories in the workshop organization.
-3. Confirm Copilot, Codespaces, Actions, and Issues are enabled.
-4. Enable **Allow GitHub Actions to create and approve pull requests**.
-5. Complete the full participant path in a disposable repository.
-
-</details>
-
 ## Further reading
 
+- [Safe outputs](https://github.github.com/gh-aw/reference/safe-outputs/)
 - [GitHub Agentic Workflows quick start](https://github.github.com/gh-aw/setup/quick-start/)
 - [GitHub Agentic Workflows documentation](https://github.github.com/gh-aw/)
