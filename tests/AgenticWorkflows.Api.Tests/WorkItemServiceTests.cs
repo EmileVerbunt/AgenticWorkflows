@@ -24,6 +24,13 @@ public sealed class WorkItemServiceTests
     }
 
     [Fact]
+    public void Assert_True()
+    {
+        Assert.True(true);
+        
+    }
+
+    [Fact]
     public void Create_trims_fields_and_adds_new_todo_item()
     {
         var service = CreateService();

@@ -1,30 +1,32 @@
 # Build Your First Agentic Workflow
 
-In this workshop you will compile and run a prebuilt GitHub Agentic Workflow, create a small workflow, and make the first workflow review test changes automatically on pull requests.
+In this workshop you will delegate a code change to the GitHub Copilot coding agent, make a separate code change yourself, request a Copilot code review, and then create and run a GitHub Agentic Workflow.
 
 The workshop takes about **45 minutes**. No previous GitHub Actions or agentic-workflow experience is required.
 
 ## Workshop flow
 
 1. Verify the prerequisites.
-2. Learn what an agentic workflow and a safe output are.
-3. Compile, merge, and manually run the prebuilt Test Quality Checker.
-4. Complete one starter or create your own workflow, then compile, merge, and run it.
-5. Update the Test Quality Checker to review pull requests changing `tests/**`.
-6. Merge that workflow update before creating a separate test-change pull request.
-7. Watch the workflow run automatically and post its findings as a PR comment.
+2. Delegate a focused test improvement to the GitHub Copilot coding agent.
+3. Make a separate code change manually and open a pull request.
+4. Request a GitHub Copilot code review on your manual pull request.
+5. Learn the agentic-workflow concepts while creating and running a custom workflow.
+6. Manually run the prebuilt Test Quality Checker.
+7. Update the Test Quality Checker to review pull requests changing `tests/**`.
+8. Open a test-change pull request.
+9. Watch the workflow review it and inspect the coding agent's pull request.
 
 ## 45-minute plan
 
-| Time | Activity |
+| Order | Activity |
 | --- | --- |
-| 0-5 minutes | Start Codespaces and verify the setup. |
-| 5-10 minutes | Learn frontmatter, instructions, compilation, and safe outputs. |
-| 10-16 minutes | Compile and merge the prebuilt workflow; start its manual run. |
-| 16-27 minutes | Complete, compile, and merge another workflow; start its run. |
-| 27-35 minutes | Refine and merge the test-only PR behavior. |
-| 35-40 minutes | Weaken the sample test and open a pull request. |
-| 40-45 minutes | Inspect the automatic comment and explore next ideas. |
+| 1 | Start Codespaces and verify the setup. |
+| 2 | Start a coding-agent task. |
+| 3 | Make a manual code change and open a pull request. |
+| 4 | Request a Copilot code review and merge the manual change. |
+| 5 | Learn the agentic-workflow concepts, then create and run one. |
+| 6 | Run and refine the Test Quality Checker. |
+| 7 | Open a test PR and inspect both agent-generated reviews. |
 
 **Fast path:** choose the duplicate-code starter, keep one trigger and one safe output, and continue to the next step while workflow runs complete in the background.
 
@@ -46,7 +48,7 @@ The Codespace installs:
 
 It also creates a repository ruleset that requires all changes to `main` to use pull requests. No approving review is required, so you can merge your own workshop PRs.
 
-You need a GitHub Copilot seat and GitHub Actions enabled under **Settings > Actions**.
+You need a GitHub Copilot seat, GitHub Actions enabled under **Settings > Actions**, and organization access to Copilot coding agent and Copilot code review.
 
 <details>
 <summary>Verify the Codespace and repository rules</summary>
@@ -88,42 +90,217 @@ Open **Settings > Rules > Rulesets > New branch ruleset**:
 </details>
 
 <details>
-<summary>Use a local machine instead</summary>
+<summary>Use macOS locally</summary>
 
-Codespaces is the recommended path. Local use requires Linux, macOS, or Windows with WSL, plus .NET 10 and these tools:
+Codespaces is the recommended path. For native macOS development, install [Homebrew](https://brew.sh/) first if it is not already available, then run:
 
 ```bash
-gh --version
-gh auth status
-gh extension install github/gh-aw
-gh aw version
+brew install git gh
+brew install --cask dotnet-sdk visual-studio-code
+
 curl -fsSL https://gh.io/copilot-install | bash
-copilot --version
-dotnet --version
+
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+export PATH="$HOME/.local/bin:$PATH"
+
+gh auth login
+gh extension install github/gh-aw --pin v0.83.1
+
+code --install-extension GitHub.copilot
+code --install-extension ms-dotnettools.csharp
 ```
 
-Run `gh auth login` when GitHub CLI reports that authentication is required.
+Clone your participant repository, open it in VS Code, and verify the setup:
+
+```bash
+git clone https://github.com/<owner>/<repository>.git
+cd <repository>
+code .
+
+gh auth status
+gh aw version
+copilot --version
+dotnet --version
+dotnet test AgenticWorkflows.slnx
+```
+
+Replace `<owner>/<repository>` with your participant repository. Restart the terminal if `copilot` or `code` is not immediately available.
 
 </details>
 
-## Step 2: Understand agentic workflows and safe outputs
+<details>
+<summary>Use Windows locally</summary>
 
-An agentic workflow is a Markdown file in `.github/workflows/`.
+Open PowerShell and install the prerequisites with Windows Package Manager:
 
-It has two parts:
+```powershell
+winget install --id Git.Git --exact
+winget install --id GitHub.cli --exact
+winget install --id Microsoft.DotNet.SDK.10 --exact
+winget install --id GitHub.Copilot --exact
+winget install --id Microsoft.VisualStudioCode --exact
+```
 
-1. **YAML frontmatter** between `---` markers. This defines when the workflow runs, what it may read, which tools it can use, and which safe outputs it may request.
-2. **Natural-language instructions** after the frontmatter. These explain what the agent should investigate, what a useful result looks like, and when it should use `noop`.
+Restart PowerShell so the new commands are on `PATH`, then authenticate and install the pinned Agentic Workflows extension:
+
+```powershell
+gh auth login
+gh extension install github/gh-aw --pin v0.83.1
+
+code --install-extension GitHub.copilot
+code --install-extension ms-dotnettools.csharp
+```
+
+Clone your participant repository, open it in VS Code, and verify the setup:
+
+```powershell
+git clone https://github.com/<owner>/<repository>.git
+Set-Location <repository>
+code .
+
+gh auth status
+gh aw version
+copilot --version
+dotnet --version
+dotnet test AgenticWorkflows.slnx
+```
+
+Replace `<owner>/<repository>` with your participant repository. If `winget` is unavailable, install or update **App Installer** from the Microsoft Store.
+
+</details>
+
+## Step 2: Delegate a change to the GitHub Copilot coding agent
+
+Start a separate cloud coding-agent task. The agent will work in the background and open its own pull request, so you can continue with the code-review exercise immediately.
+
+1. Open the **Issues** tab on GitHub and create a new issue.
+2. Use the sample instructions below as the issue body.
+3. In the issue sidebar, assign the issue to **Copilot**.
+4. If GitHub asks for an optional prompt, tell Copilot to follow the issue instructions and run the tests.
+
+<details>
+<summary>Sample coding-agent instructions</summary>
+
+```text
+Add focused unit tests for NotificationComposer.
+
+Create a new test file under tests/AgenticWorkflows.Api.Tests that verifies:
+- descriptions longer than 90 characters are truncated with an ellipsis
+- notifications omit the due-date line when DueDate is null
+- created and due-soon notifications contain their expected next-step text
+
+Do not change production behavior unless a test exposes a real defect. Follow the existing xUnit style and run:
+
+dotnet test AgenticWorkflows.slnx
+```
+
+</details>
+
+Assigning the issue to Copilot starts a cloud agent session. Copilot creates a linked pull request and requests your review when the task is complete.
+
+**Checkpoint:** the issue shows that Copilot is working. Continue without waiting.
+
+## Step 3: Make a manual code change
+
+While the coding agent works, add a separate API change yourself. The first version intentionally contains a missing-resource bug so the code-review agent has something meaningful to find.
+
+> **Exercise intent:** implement and push the flawed version exactly as shown. Do not fix the bug before requesting Copilot code review. The existing tests still pass, so the review agent must identify the behavioral problem.
+
+Create a branch:
+
+```bash
+git switch -c workshop/get-work-item-endpoint
+```
+
+Open `src/AgenticWorkflows.Api/Program.cs` and add this endpoint after the summary endpoint:
+
+```csharp
+workItems.MapGet("/{id:guid}", (Guid id, WorkItemService service) =>
+        Results.Ok(service.Find(id)))
+    .WithName("GetWorkItem");
+```
+
+This implementation returns `200 OK` with a `null` body when the ID does not exist instead of returning `404 Not Found`. Commit and push this known bug so Copilot can catch it in the pull request.
+
+The repository's `.github/copilot-instructions.md` asks Copilot reviewers to verify missing-resource status codes, making this a reliable review signal.
+
+Run the tests, commit, and open a pull request:
+
+```bash
+dotnet test AgenticWorkflows.slnx
+git add src/AgenticWorkflows.Api/Program.cs
+git commit -m "Add work item lookup endpoint"
+git push -u origin HEAD
+gh pr create --fill
+```
+
+Do not merge the pull request yet.
+
+**Checkpoint:** your manual code-change pull request is open.
+
+## Step 4: Request a GitHub Copilot code review
+
+Open the manual code-change pull request you created in Step 3.
+
+1. In the pull request sidebar, find **Reviewers**.
+2. Next to **Copilot**, select **Request**.
+3. Wait for the review to appear, then read any summary and inline comments.
+4. Look for feedback about the endpoint returning a successful response when the work item is missing.
+
+Copilot code review comments are advisory. They do not count as an approving review and do not block merging.
+
+**Expected finding:** `service.Find(id)` can return `null`, but wrapping that result in `Results.Ok(...)` still produces a successful response. The endpoint should return `404 Not Found` for an unknown ID.
+
+Before merging, fix the endpoint:
+
+```csharp
+workItems.MapGet("/{id:guid}", (Guid id, WorkItemService service) =>
+    {
+        var item = service.Find(id);
+
+        if (item is null)
+        {
+            return Results.NotFound();
+        }
+
+        return Results.Ok(item);
+    })
+    .WithName("GetWorkItem");
+```
+
+Run the tests and push the correction:
+
+```bash
+dotnet test AgenticWorkflows.slnx
+git add src/AgenticWorkflows.Api/Program.cs
+git commit -m "Return not found for missing work items"
+git push
+```
+
+Optionally request another Copilot review to confirm the issue is resolved. Then merge the pull request:
+
+```bash
+gh pr merge --squash --delete-branch
+git switch main
+git pull --ff-only
+```
+
+**Checkpoint:** the manual change is merged and you have seen a Copilot code review.
+
+## Step 5: Create a custom agentic workflow
+
+Now that you have used the coding and code-review agents, learn the agentic-workflow concepts while building one yourself.
+
+An agentic workflow is a Markdown file in `.github/workflows/` with two parts:
+
+1. **YAML frontmatter** between `---` markers defines when the workflow runs, what it may read, which tools it can use, and which safe outputs it may request.
+2. **Natural-language instructions** explain what the agent should investigate, what a useful result looks like, and when it should use `noop`.
 
 `gh aw compile` validates the Markdown and creates a hardened `.lock.yml` file that GitHub Actions can run.
 
 ### What is a safe output?
 
-A safe output is a controlled GitHub write operation declared under `safe-outputs:`.
-
-The agent itself remains read-only. It requests an operation using structured output, and a separate permission-controlled job validates and performs that operation. This limits what can be changed, how many changes can be made, and where they can be applied.
-
-Examples include:
+A safe output is a controlled GitHub write operation declared under `safe-outputs:`. The agent remains read-only and requests a narrowly configured operation that a separate permission-controlled job validates and performs.
 
 | Safe output | What it can do | Example use |
 | --- | --- | --- |
@@ -131,14 +308,11 @@ Examples include:
 | `add-comment` | Comment on an issue or PR | Review changed tests |
 | `create-pull-request` | Propose file changes in a PR | Update stale documentation |
 | `add-labels` | Add allowed labels | Triage incoming issues |
-| `update-issue` | Update selected issue fields | Maintain a generated status section |
 
 `noop` is always available. It is the correct result when the workflow succeeds but finds nothing useful to change.
 
 <details>
-<summary>Five safe-output configuration examples</summary>
-
-Create one focused issue:
+<summary>Safe-output configuration examples</summary>
 
 ```yaml
 safe-outputs:
@@ -147,16 +321,12 @@ safe-outputs:
     max: 1
 ```
 
-Comment once on the triggering pull request and hide the workflow's older comment:
-
 ```yaml
 safe-outputs:
   add-comment:
     max: 1
     hide-older-comments: true
 ```
-
-Create a draft documentation PR restricted to Markdown files:
 
 ```yaml
 safe-outputs:
@@ -167,166 +337,39 @@ safe-outputs:
     max: 1
 ```
 
-Add only approved triage labels:
-
-```yaml
-safe-outputs:
-  add-labels:
-    allowed: [bug, documentation, enhancement]
-    max: 2
-```
-
-Allow a workflow to update the triggering issue body:
-
-```yaml
-safe-outputs:
-  update-issue:
-    body: true
-    target: "triggering"
-    max: 1
-```
-
 </details>
 
-See the [complete safe-output reference](https://github.github.com/gh-aw/reference/safe-outputs/) for many more output types and configuration options.
+Open `.github/workflows/test-quality-checker.md` and identify:
 
-Open `.github/workflows/test-quality-checker.md` and find:
-
-- `workflow_dispatch` and `pull_request` on newly opened PRs
+- `workflow_dispatch` for an intentional manual run
 - read-only permissions plus `copilot-requests: write`
 - `safe-outputs: create-issue`
 - the instructions describing useful and weak tests
 - the explicit `noop` behavior
 
-## Step 3: Compile and merge the prebuilt workflow
+See the [complete safe-output reference](https://github.github.com/gh-aw/reference/safe-outputs/) when designing your own workflow.
 
-The Test Quality Checker source is complete, but its generated lock file is intentionally absent.
+### Build the workflow
 
-Create a branch and compile:
+Choose one small workflow:
 
-```bash
-git switch -c workshop/compile-test-quality
-gh aw compile test-quality-checker --validate
-```
+- Complete `.github/workflows/docs-updater.md` to find stale documentation and open a documentation-only pull request.
+- Complete `.github/workflows/duplicate-code-detector.md` to report meaningful duplicate production code.
+- Create your own workflow for a repetitive repository task that still needs judgment.
 
-The command creates `.github/workflows/test-quality-checker.lock.yml`.
+Decide when it runs, what it inspects, which one safe output it creates, and when it should use `noop`.
 
-<details>
-<summary>Commit, open, and merge the pull request</summary>
-
-```bash
-git add .github/workflows/test-quality-checker.lock.yml \
-  .github/aw/actions-lock.json
-git commit -m "Compile test quality checker"
-git push -u origin HEAD
-gh pr create --fill
-gh pr merge --squash --delete-branch
-git switch main
-git pull --ff-only
-```
-
-If `.github/aw/actions-lock.json` did not change, Git ignores it.
-
-</details>
-
-**Checkpoint:** the generated lock file now exists on `main`.
-
-Run the workflow:
-
-```bash
-gh aw run test-quality-checker
-gh aw status
-```
-
-The run should create a test-quality issue or explicitly report a no-op. You can continue to Step 4 while it runs.
-
-The workflow also runs automatically when later pull requests are opened. Until Step 5, those automatic runs use the same issue output as manual runs.
-
-## Step 4: Create another workflow
-
-Choose one small workflow.
-
-### Option A: Documentation updater
-
-Complete `.github/workflows/docs-updater.md`. Its frontmatter is present, but its instruction body is empty.
-
-It should run daily and manually, identify stale documentation, open a documentation-only PR, and use `noop` when everything is current.
-
-### Option B: Duplicate-code detector
-
-Complete `.github/workflows/duplicate-code-detector.md`. Its frontmatter is present, but its instruction body is empty.
-
-It should run manually, ignore trivial similarities, avoid duplicate reports, and open focused refactoring issues or use `noop`.
-
-### Option C: Your own workflow
-
-Choose a repetitive repository task that still needs judgment. Keep it small enough to describe in one or two sentences.
-
-Answer:
-
-1. When should it run?
-2. What should it inspect?
-3. What one safe output should it create?
-4. When should it use `noop`?
+Use Copilot Chat in VS Code Agent mode or run `copilot` from the repository root.
 
 <details>
-<summary>Ideas if you are stuck</summary>
-
-- Find public API behavior without a meaningful test.
-- Find inconsistent API error responses.
-- Find missing logs around important failure paths.
-- Review a pull request and suggest a test plan.
-- Create release notes from recently merged pull requests.
-
-</details>
-
-### Ask Copilot to create it
-
-**Recommended:** use Copilot Chat in VS Code Agent mode.
-
-Alternatively, run `copilot` from the repository root, confirm that you trust the folder, use `/login` if prompted, and use `/diff` to review changes.
-
-<details>
-<summary>Prompt: Documentation updater</summary>
+<summary>Copy-paste workflow prompt</summary>
 
 ```text
-Create a workflow for GitHub Agentic Workflows using https://raw.githubusercontent.com/github/gh-aw/main/create.md
+Create a workflow for GitHub Agentic Workflows using https://raw.githubusercontent.com/github/gh-aw/main/create.md.
 
 Do not install, upgrade, or downgrade gh-aw. Use the installed v0.83.1 CLI.
 
-Complete .github/workflows/docs-updater.md.
-
-The workflow should run daily and keep repository documentation up to date. Identify documentation files that are out of sync with recent code changes and open a pull request with only the necessary documentation updates.
-
-Also support workflow_dispatch so we can test it during the workshop. Keep repository access read-only, restrict the pull request to Markdown files, and use noop when no update is needed.
-```
-
-</details>
-
-<details>
-<summary>Prompt: Duplicate-code detector</summary>
-
-```text
-Create a workflow for GitHub Agentic Workflows using https://raw.githubusercontent.com/github/gh-aw/main/create.md
-
-Do not install, upgrade, or downgrade gh-aw. Use the installed v0.83.1 CLI.
-
-Complete .github/workflows/duplicate-code-detector.md.
-
-The workflow should run on demand and detect meaningful duplicate or near-duplicate production code. Ignore tests, generated files, build artifacts, boilerplate, and trivial similarities. Avoid reporting an equivalent open issue. Open focused issues with file references, impact, refactoring guidance, and validation steps. Use noop when there is no actionable duplication.
-```
-
-</details>
-
-<details>
-<summary>Prompt template: Your own workflow</summary>
-
-```text
-Create a workflow for GitHub Agentic Workflows using https://raw.githubusercontent.com/github/gh-aw/main/create.md
-
-Do not install, upgrade, or downgrade gh-aw. Use the installed v0.83.1 CLI.
-
-Create .github/workflows/<workflow-id>.md.
+Create or complete .github/workflows/<workflow-id>.md.
 
 The workflow should <describe the small task>.
 Run it <manually, daily, or for a pull request>.
@@ -334,15 +377,12 @@ It should inspect <repository content>.
 It should create <one safe output>.
 Use noop when <nothing useful needs to be created>.
 
-Keep repository access read-only and support workflow_dispatch so we can test it during the workshop.
+Keep repository access read-only and support workflow_dispatch so we can test it during the workshop. Compile the workflow and fix every validation error.
 ```
 
 </details>
 
-Create a branch, compile, and merge:
-
-<details>
-<summary>Commands</summary>
+Create a branch, compile, merge, and run the workflow:
 
 ```bash
 git switch -c workshop/<workflow-id>
@@ -360,15 +400,26 @@ gh aw run <workflow-id>
 gh aw status
 ```
 
-</details>
-
 Fix every compile warning in the Markdown source. Never edit a generated `.lock.yml` by hand.
 
-**Checkpoint:** your workflow is merged and its manual run has started. Continue while it runs.
+**Checkpoint:** your custom workflow is merged and its manual run has started.
 
-## Step 5: Refine pull-request review for test changes
+## Step 6: Run the Test Quality Checker manually
 
-The prebuilt workflow already runs manually and when a pull request is opened. Now refine its PR behavior so it runs only for test changes, reruns when the PR changes, and comments directly on the PR.
+The prebuilt Test Quality Checker is manual-only at this point. Run it once to establish the baseline behavior:
+
+```bash
+gh aw run test-quality-checker
+gh aw status
+```
+
+The run should create a test-quality issue or explicitly report a no-op.
+
+**Checkpoint:** the manual Test Quality Checker run has started.
+
+## Step 7: Refine pull-request review for test changes
+
+The prebuilt workflow currently runs only when manually dispatched. Now add pull-request behavior so it runs only for test changes, reruns when the PR changes, and comments directly on the PR.
 
 The refinement must be merged to `main` **before** opening the test-change PR so that PR uses the new path filter and comment output.
 
@@ -386,9 +437,9 @@ Update .github/workflows/test-quality-checker.md using https://raw.githubusercon
 
 Do not install, upgrade, or downgrade gh-aw. Use the installed v0.83.1 CLI.
 
-Keep the existing workflow_dispatch trigger, pull_request opened trigger, and create-issue behavior for manual runs.
+Keep the existing workflow_dispatch trigger and create-issue behavior for manual runs.
 
-Refine pull_request to run for opened, synchronize, and reopened, but only when files under tests/** change. Keep the agent job read-only. Add the add-comment safe output for the triggering pull request.
+Add pull_request for opened, synchronize, and reopened, but only when files under tests/** change. Keep the agent job read-only. Add the add-comment safe output for the triggering pull request.
 
 For pull-request runs, review the changed test files and relevant production behavior. Post one concise pull-request comment with:
 - what the changed tests cover well
@@ -447,7 +498,7 @@ git pull --ff-only
 
 **Checkpoint:** the test-only PR trigger and comment output are now present on `main`.
 
-## Step 6: Create the test-change pull request
+## Step 8: Create the test-change pull request
 
 Create a separate branch:
 
@@ -489,7 +540,7 @@ gh pr create --fill
 
 Do not merge this pull request yet.
 
-## Step 7: Watch the automatic review
+## Step 9: Watch the automatic review
 
 Watch the pull-request checks:
 
@@ -505,15 +556,21 @@ gh aw status
 
 When the workflow completes, refresh the pull request. The Test Quality Checker should post its findings as a PR comment, or explicitly no-op if it finds no actionable problem.
 
+Return to the issue assigned to Copilot. Open the linked coding-agent pull request, inspect the changes and test results, and leave feedback or merge it when you are satisfied.
+
 ## You are done when
 
-- [ ] You compiled and manually ran the prebuilt Test Quality Checker.
-- [ ] You completed a starter workflow or created a small workflow of your own.
-- [ ] You compiled and manually ran your workflow.
+- [ ] You assigned a focused code change to the GitHub Copilot coding agent.
+- [ ] You made a separate code change and opened a pull request.
+- [ ] You requested and inspected a GitHub Copilot code review on the manual pull request.
+- [ ] You fixed the missing-resource response and merged the manual code change.
+- [ ] You completed, compiled, and manually ran a custom agentic workflow.
+- [ ] You manually ran the prebuilt Test Quality Checker.
 - [ ] The refined test-only PR trigger and comment output are merged to `main`.
 - [ ] You opened a separate pull request changing a file under `tests/**`.
 - [ ] The workflow ran automatically.
 - [ ] The pull request contains the workflow's comment or an explicit no-op result.
+- [ ] You inspected the coding agent's linked pull request.
 
 ## The art of the possible
 
@@ -560,6 +617,13 @@ Confirm the trigger refinement was merged before the test PR was created, the te
 </details>
 
 <details>
+<summary>Copilot is not available as an assignee or reviewer</summary>
+
+Ask the organization owner to enable Copilot coding agent and Copilot code review. Also confirm that you have access to the repository and a GitHub Copilot seat.
+
+</details>
+
+<details>
 <summary>The workflow ran but did not comment</summary>
 
 Check the run logs for `noop`. Also confirm the workflow has `safe-outputs: add-comment` and its instructions say to comment on the triggering pull request.
@@ -585,3 +649,5 @@ Rebuild the Codespace container. It installs or repairs both CLIs during creatio
 - [Safe outputs](https://github.github.com/gh-aw/reference/safe-outputs/)
 - [GitHub Agentic Workflows quick start](https://github.github.com/gh-aw/setup/quick-start/)
 - [GitHub Agentic Workflows documentation](https://github.github.com/gh-aw/)
+- [Kick off a task with Copilot agents](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/kick-off-a-task)
+- [Use GitHub Copilot code review](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/copilot-code-review)
