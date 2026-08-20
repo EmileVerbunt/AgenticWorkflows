@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-13T13:50:00+02:00",
+  "title": "Design System: GitHub Agentic Workflows Presentation",
+  "extensions": {
+    "colorMeta": {
+      "stage-black": {
+        "role": "neutral",
+        "displayName": "Projector Black",
+        "canonical": "oklch(0.085 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.25 0 0)",
+          "oklch(0.35 0 0)",
+          "oklch(0.45 0 0)",
+          "oklch(0.55 0 0)",
+          "oklch(0.68 0 0)",
+          "oklch(0.82 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "moss-anchor": {
+        "role": "primary",
+        "displayName": "Control Room Moss",
+        "canonical": "oklch(0.72 0.16 158)",
+        "tonalRamp": [
+          "oklch(0.15 0.16 158)",
+          "oklch(0.25 0.16 158)",
+          "oklch(0.35 0.16 158)",
+          "oklch(0.45 0.16 158)",
+          "oklch(0.55 0.16 158)",
+          "oklch(0.68 0.16 158)",
+          "oklch(0.82 0.16 158)",
+          "oklch(0.95 0.16 158)"
+        ]
+      },
+      "problem-coral": {
+        "role": "secondary",
+        "displayName": "Maintenance Coral",
+        "canonical": "oklch(0.72 0.17 25)",
+        "tonalRamp": [
+          "oklch(0.15 0.17 25)",
+          "oklch(0.25 0.17 25)",
+          "oklch(0.35 0.17 25)",
+          "oklch(0.45 0.17 25)",
+          "oklch(0.55 0.17 25)",
+          "oklch(0.68 0.17 25)",
+          "oklch(0.82 0.17 25)",
+          "oklch(0.95 0.17 25)"
+        ]
+      },
+      "architecture-blue": {
+        "role": "tertiary",
+        "displayName": "Guardrail Blue",
+        "canonical": "oklch(0.73 0.14 250)",
+        "tonalRamp": [
+          "oklch(0.15 0.14 250)",
+          "oklch(0.25 0.14 250)",
+          "oklch(0.35 0.14 250)",
+          "oklch(0.45 0.14 250)",
+          "oklch(0.55 0.14 250)",
+          "oklch(0.68 0.14 250)",
+          "oklch(0.82 0.14 250)",
+          "oklch(0.95 0.14 250)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Stage Display",
+        "purpose": "Title scenes and closing beliefs only."
+      },
+      "body": {
+        "displayName": "Spoken Support",
+        "purpose": "Short supporting copy that complements the presenter."
+      },
+      "mono": {
+        "displayName": "Workflow Syntax",
+        "purpose": "Commands, file names, workflow source, and machine state only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "overlay",
+        "value": "0 1.2rem 4rem oklch(0 0 0 / 0.42)",
+        "purpose": "Presenter notes and modal overlays escaping the stage plane."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Scene transitions, staged reveals, and diagram progression."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-stage",
+        "value": "1000px width or 700px height"
+      },
+      {
+        "name": "narrow-rehearsal",
+        "value": "760px width"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Presentation Control",
+      "kind": "button",
+      "refersTo": "presentation-control",
+      "description": "Compact persistent navigation button.",
+      "html": "<button class=\"ds-presentation-control\">Overview</button>",
+      "css": ".ds-presentation-control { color: oklch(0.83 0.01 160); background: oklch(0.115 0.008 160); border: 1px solid oklch(0.29 0.015 160); border-radius: 999px; padding: 0.45rem 0.8rem; font: 500 0.8rem 'Mona Sans Variable', sans-serif; transition: background 180ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-presentation-control:hover { color: oklch(0.985 0 0); background: oklch(0.19 0.012 160); } .ds-presentation-control:focus-visible { outline: 3px solid oklch(0.72 0.16 158); outline-offset: 4px; }"
+    },
+    {
+      "name": "Scene Surface",
+      "kind": "custom",
+      "refersTo": "scene-surface",
+      "description": "Contained information surface used only when structure requires it.",
+      "html": "<section class=\"ds-scene-surface\"><strong>Guarded outcome</strong><p>Reviewable result with a scoped write path.</p></section>",
+      "css": ".ds-scene-surface { color: oklch(0.985 0 0); background: oklch(0.145 0.008 160); border: 1px solid oklch(0.29 0.015 160); border-radius: 1rem; padding: 1.4rem; font-family: 'Mona Sans Variable', sans-serif; } .ds-scene-surface strong { color: oklch(0.73 0.14 250); } .ds-scene-surface p { color: oklch(0.83 0.01 160); margin: 0.5rem 0 0; }"
+    },
+    {
+      "name": "Workflow Code Panel",
+      "kind": "custom",
+      "refersTo": "code-panel",
+      "description": "Human-readable workflow source with active-line treatment.",
+      "html": "<pre class=\"ds-code-panel\"><code><span>permissions: read-all</span>\\n<span class=\"ds-code-active\">Read the issue and repository docs.</span></code></pre>",
+      "css": ".ds-code-panel { color: oklch(0.985 0 0); background: oklch(0.105 0.006 160); border: 1px solid oklch(0.29 0.015 160); border-radius: 1rem; padding: 1.4rem; font: 400 0.95rem/1.55 'SFMono-Regular', Consolas, monospace; } .ds-code-panel span { display: block; color: oklch(0.68 0.012 160); padding: 0.15rem 0.5rem; } .ds-code-panel .ds-code-active { color: oklch(0.985 0 0); background: oklch(0.73 0.14 250 / 0.1); border-radius: 0.35rem; }"
+    },
+    {
+      "name": "Micro-demo Stage",
+      "kind": "custom",
+      "refersTo": "scene-surface",
+      "description": "Captured-safe live demo surface with explicit status.",
+      "html": "<section class=\"ds-demo-stage\"><header><span></span> Configurable micro-demo</header><code>$ gh aw run maintenance-example</code><p>Proposed safe output is ready for review.</p></section>",
+      "css": ".ds-demo-stage { color: oklch(0.985 0 0); background: oklch(0.105 0.006 160); border: 1px solid oklch(0.73 0.16 305); border-radius: 1rem; overflow: hidden; font-family: 'Mona Sans Variable', sans-serif; } .ds-demo-stage header { padding: 0.85rem 1rem; border-bottom: 1px solid oklch(0.29 0.015 160); } .ds-demo-stage header span { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: oklch(0.73 0.16 305); margin-right: 0.5rem; } .ds-demo-stage code { display: block; padding: 2rem 1rem 0.8rem; } .ds-demo-stage p { color: oklch(0.73 0.16 305); padding: 0 1rem 2rem; margin: 0; }"
+    },
+    {
+      "name": "Source Link",
+      "kind": "custom",
+      "refersTo": "scene-surface",
+      "description": "Quiet factual reference anchored to the bottom of a scene.",
+      "html": "<a class=\"ds-source-link\" href=\"#\">Security architecture ↗</a>",
+      "css": ".ds-source-link { color: oklch(0.68 0.012 160); font: 400 0.82rem 'Mona Sans Variable', sans-serif; text-decoration: none; } .ds-source-link:hover { color: oklch(0.985 0 0); } .ds-source-link:focus-visible { outline: 3px solid oklch(0.72 0.16 158); outline-offset: 4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Illuminated Control Room",
+    "overview": "A live system whose moving parts become legible one layer at a time. Projector-first contrast, GitHub-native typography, chapter color, and choreographed diagrams explain maintenance problems before agentic responses.",
+    "keyCharacteristics": [
+      "Projector-first dark stage",
+      "One chapter accent at a time",
+      "Scale-over-weight typography",
+      "Problem-first micro-demos",
+      "Keyboard-first operation"
+    ],
+    "rules": [
+      {
+        "name": "The One-Chapter Rule",
+        "body": "One chapter accent owns the active scene.",
+        "section": "colors"
+      },
+      {
+        "name": "The Scale-Over-Weight Rule",
+        "body": "Headlines gain authority through size and negative space, not heavy weight.",
+        "section": "typography"
+      },
+      {
+        "name": "The Earned-Depth Rule",
+        "body": "A surface floats only when it must escape the stage plane.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do introduce the maintenance failure before the agentic workflow.",
+      "Do pair every capability with its control boundary.",
+      "Do keep source links attached to factual claims."
+    ],
+    "donts": [
+      "Don't turn the experience into a dense documentation walkthrough.",
+      "Don't imitate a default Microsoft PowerPoint corporate template.",
+      "Don't imply that agentic workflows remove human accountability."
+    ]
+  }
+}
