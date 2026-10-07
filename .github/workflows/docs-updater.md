@@ -3,7 +3,6 @@ name: Documentation Updater
 description: Keeps repository documentation aligned with current code behavior.
 
 on:
-  schedule: daily
   workflow_dispatch:
 
 permissions:
